@@ -1,0 +1,237 @@
+<title>Cardápio que Vende</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Layout: cardápio de balcão — faixas de cor por seção, prompts como comandas impressas */
+:root {
+  --papel:#FBF8F1; --tinta:#1D1A16; --tomate:#C8372D; --manjericao:#2E5E3A; --mostarda:#F2C230;
+  --cinza:#6B6458; --linha:#DED6C6; --cartao:#FFFFFF; --realce:#FCEBB0; --sobre-cor:#FBF8F1;
+  --f-disp:'Archivo','Arial Black',system-ui,sans-serif; --f-texto:'Source Serif 4',Georgia,serif; --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --papel:#16130F; --tinta:#F1EBDF; --tomate:#B8322A; --manjericao:#2A5535; --cinza:#A99F8E; --linha:#38322A;
+  --cartao:#211D18; --realce:#5A4A12; color-scheme:dark } }
+:root[data-theme="dark"] { --papel:#16130F; --tinta:#F1EBDF; --tomate:#B8322A; --manjericao:#2A5535; --cinza:#A99F8E; --linha:#38322A;
+  --cartao:#211D18; --realce:#5A4A12; color-scheme:dark }
+* { box-sizing:border-box }
+body { background:var(--papel); color:var(--tinta); font:17px/1.6 var(--f-texto); margin:0 }
+.faixa { padding-inline:16px; padding-block:64px }
+.miolo { max-width:1040px; margin:0 auto }
+h1,h2,h3 { font-family:var(--f-disp); text-wrap:balance; margin:0 }
+h2 { font-size:clamp(30px,5vw,48px); font-weight:900; text-transform:uppercase; line-height:.98; letter-spacing:-.015em }
+.olho { font:600 13px var(--f-mono); letter-spacing:.14em; text-transform:uppercase; color:var(--tomate); margin-bottom:12px }
+p { max-width:62ch; margin:0 }
+.mono { font-family:var(--f-mono) }
+
+.hero { background:var(--tomate); color:var(--sobre-cor) }
+.hero .miolo { display:grid; grid-template-columns:1.25fr 1fr; gap:48px; align-items:center }
+.hero h1 { font-size:clamp(48px,9vw,104px); font-weight:900; text-transform:uppercase; line-height:.9; letter-spacing:-.025em }
+.hero .sub { font-size:21px; line-height:1.4; margin-top:20px; max-width:30ch }
+.hero .olho { color:var(--mostarda) }
+.ticket { background:#FBF8F1; color:#1D1A16; font:15px/1.75 var(--f-mono); padding:26px 28px; box-shadow:0 10px 0 rgba(0,0,0,.2); transform:rotate(-2.5deg); max-width:360px; justify-self:center; width:100% }
+.ticket hr { border:0; border-top:2px dashed #1D1A16; margin:12px 0 }
+.ticket .tot { display:flex; justify-content:space-between; font-weight:600 }
+.acoes { display:flex; flex-wrap:wrap; gap:14px 20px; align-items:center; margin-top:30px }
+.btn { display:inline-block; font:800 18px var(--f-disp); text-transform:uppercase; letter-spacing:.02em; background:var(--mostarda); color:#1D1A16;
+  padding:16px 26px; text-decoration:none; border:0; cursor:pointer; box-shadow:0 5px 0 #1D1A16; transition:transform .12s, box-shadow .12s }
+.btn:hover { transform:translateY(2px); box-shadow:0 3px 0 #1D1A16 }
+.btn:focus-visible { outline:3px solid var(--tinta); outline-offset:3px }
+.btn[aria-disabled="true"] { opacity:.75; cursor:default }
+.nota { font:14px var(--f-mono); opacity:.9 }
+
+.caps { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:36px 32px; margin-top:40px }
+.cap { border-top:4px solid var(--tinta); padding-top:14px; min-width:0 }
+.cap .n { font:600 13px var(--f-mono); color:var(--cinza) }
+.cap h3 { font-size:23px; font-weight:800; margin:4px 0 8px }
+.cap ul { margin:0; padding-left:18px; color:var(--cinza); font-size:15.5px }
+
+.amostra { background:var(--tinta); color:var(--papel) }
+.amostra .olho { color:var(--mostarda) }
+.abas { display:flex; flex-wrap:wrap; gap:8px; margin:28px 0 16px }
+.aba { font:600 14px var(--f-mono); background:transparent; color:var(--papel); border:1.5px solid currentColor; padding:8px 14px; cursor:pointer }
+.aba[aria-selected="true"] { background:var(--mostarda); color:#1D1A16; border-color:var(--mostarda) }
+.aba:focus-visible { outline:2px solid var(--mostarda); outline-offset:2px }
+.cmd { max-height:460px; overflow:auto; background:#FBF8F1; color:#1D1A16; font:15.5px/1.7 var(--f-mono); padding:22px 24px; border-left:8px solid var(--mostarda); white-space:pre-wrap; min-width:0; overflow-wrap:anywhere }
+.cmd .ph { background:#FCEBB0; padding:0 3px }
+.cmd-rod { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; margin-top:14px }
+.copiar { font:600 14px var(--f-mono); background:var(--papel); color:var(--tinta); border:0; padding:10px 16px; cursor:pointer }
+.copiar:focus-visible { outline:2px solid var(--mostarda); outline-offset:2px }
+:root:not([data-theme="light"]) .amostra .copiar { background:#FBF8F1; color:#1D1A16 }
+
+.pra { display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-top:32px }
+.pra ul { list-style:none; padding:0; margin:0; display:grid; gap:12px }
+.pra li { padding-left:30px; position:relative }
+.pra li::before { content:"✓"; position:absolute; left:0; font:800 18px var(--f-disp); color:var(--manjericao) }
+.pra .nao li::before { content:"✕"; color:var(--tomate) }
+.pra h3 { font-size:20px; margin-bottom:14px }
+
+.oferta { background:var(--manjericao); color:var(--sobre-cor) }
+.oferta .miolo { display:grid; grid-template-columns:1fr auto; gap:40px; align-items:center }
+.oferta .olho { color:var(--mostarda) }
+.preco { font:900 clamp(64px,12vw,120px)/.9 var(--f-disp); letter-spacing:-.03em }
+.preco small { font-size:.3em; letter-spacing:0; vertical-align:top; margin-right:6px }
+.oferta ul { padding-left:18px; margin:18px 0 0 }
+
+.faq { display:grid; gap:0; margin-top:28px; border-top:1px solid var(--linha) }
+details { border-bottom:1px solid var(--linha); padding:18px 0 }
+summary { font:800 19px var(--f-disp); cursor:pointer; list-style:none; display:flex; justify-content:space-between; gap:16px }
+summary::after { content:"+"; font-family:var(--f-mono); color:var(--tomate) }
+details[open] summary::after { content:"−" }
+summary:focus-visible { outline:2px solid var(--tomate); outline-offset:4px }
+details p { margin-top:10px; color:var(--cinza) }
+footer { padding-inline:16px; padding-block:32px; font:13px var(--f-mono); color:var(--cinza); text-align:center }
+
+@media (max-width:1100px) { .caps { grid-template-columns:repeat(3,minmax(0,1fr)) } }
+@media (max-width:800px) {
+  .hero .miolo, .pra, .oferta .miolo { grid-template-columns:1fr }
+  .caps { grid-template-columns:1fr 1fr }
+  .cap h3 { font-size:20px }
+  .ticket { transform:rotate(-1.5deg) }
+  .faixa { padding-block:48px }
+}
+@media (max-width:520px) { .caps { grid-template-columns:1fr } }
+@media (prefers-reduced-motion: reduce) { .btn { transition:none } }
+</style>
+
+<header class="faixa hero">
+  <div class="miolo">
+    <div>
+      <div class="olho">Para quem cozinha e ainda cuida do Instagram</div>
+      <h1>Cardápio que Vende</h1>
+      <p class="sub">207 prompts prontos para pedir ajuda ao ChatGPT quando precisar escrever o cardápio, responder um cliente, montar a promoção da semana ou calcular o preço de um prato. Funciona no plano gratuito.</p>
+      <div class="acoes">
+        <a class="btn" href="#dentro">Ver o que tem dentro</a>
+        <span class="nota">Tudo num site para usar no celular ou no computador</span>
+      </div>
+    </div>
+    <div class="ticket" aria-label="Resumo do pedido">
+      COMANDA Nº 207<hr>
+      10x Capítulos<br>36x Prompts com foto<br>31x Projetos grandes<br>1x Ficha do negócio<br>1x Exportar para o ChatGPT<hr>
+      <div class="tot"><span>TOTAL</span><span>R$ 9,99</span></div>
+      FUNCIONA NO CHATGPT GRÁTIS
+    </div>
+  </div>
+</header>
+
+<section class="faixa" id="dentro">
+  <div class="miolo">
+    <div class="olho">O que tem dentro</div>
+    <h2>Dez capítulos,<br>um para cada correria</h2>
+    <p style="margin-top:16px;color:var(--cinza)">Cada prompt já vem montado com o papel do especialista, o que ele sabe sobre o assunto, as etapas e o formato da resposta. Você completa com os dados do seu negócio e cola no ChatGPT.</p>
+    <div class="caps">
+      <div class="cap"><div class="n">Prompts 001–023</div><h3>Cardápio e produtos</h3><ul><li>Descrição de prato que dá vontade</li><li>Reescrever o cardápio inteiro</li><li>Nomes criativos para pratos</li></ul></div>
+      <div class="cap"><div class="n">Prompts 024–049</div><h3>Instagram</h3><ul><li>Legenda para foto de prato</li><li>Legenda olhando a foto</li><li>Calendário de 7 posts da semana</li></ul></div>
+      <div class="cap"><div class="n">Prompts 050–069</div><h3>WhatsApp e vendas diretas</h3><ul><li>Mensagem de boas-vindas automática</li><li>Respostas rápidas do WhatsApp Business</li><li>Mensagem para lista de transmissão</li></ul></div>
+      <div class="cap"><div class="n">Prompts 070–089</div><h3>iFood e delivery</h3><ul><li>Descrição da loja no aplicativo</li><li>Responder avaliação negativa</li><li>Responder avaliação positiva</li></ul></div>
+      <div class="cap"><div class="n">Prompts 090–111</div><h3>Promoções, datas e campanhas</h3><ul><li>Promoção para o dia mais fraco</li><li>Calendário promocional do ano</li><li>Campanha completa de data comemorativa</li></ul></div>
+      <div class="cap"><div class="n">Prompts 112–131</div><h3>Atendimento e reputação</h3><ul><li>Reclamação grave (cabelo, objeto, mal-estar)</li><li>Respostas para as 20 perguntas mais comuns</li><li>Cliente pedindo desconto</li></ul></div>
+      <div class="cap"><div class="n">Prompts 132–153</div><h3>Gestão, preços e números</h3><ul><li>Preço de venda de um prato</li><li>Ficha técnica completa</li><li>Fichas técnicas do cardápio inteiro</li></ul></div>
+      <div class="cap"><div class="n">Prompts 154–171</div><h3>Equipe e operação</h3><ul><li>Escala semanal da equipe</li><li>Checklist de abertura e fechamento</li><li>Manual do funcionário</li></ul></div>
+      <div class="cap"><div class="n">Prompts 172–189</div><h3>Fotos e imagens</h3><ul><li>Avaliar a fachada</li><li>Avaliar o salão</li><li>Criar post a partir de várias fotos</li></ul></div>
+      <div class="cap"><div class="n">Prompts 190–207</div><h3>Projetos grandes</h3><ul><li>Texto completo do site</li><li>Abrir delivery do zero</li><li>Abrir um restaurante: plano de 90 dias</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="faixa amostra">
+  <div class="miolo">
+    <div class="olho">Pode testar</div>
+    <h2>Experimente um prompt antes</h2>
+    <p style="margin-top:16px;opacity:.8">Estes três saíram da biblioteca do jeito que estão lá. Copie, cole no ChatGPT e troque o que está destacado pelos seus dados.</p>
+    <div class="abas" role="tablist" aria-label="Prompts de amostra">
+      <button class="aba" role="tab" id="aba-0" aria-selected="true" data-i="0">001 · Descrição de prato que dá vontade</button>
+      <button class="aba" role="tab" id="aba-1" aria-selected="false" data-i="1">071 · Responder avaliação negativa</button>
+      <button class="aba" role="tab" id="aba-2" aria-selected="false" data-i="2">172 · Avaliar a fachada</button>
+    </div>
+    <div class="cmd" id="cmd" role="tabpanel" aria-live="polite"></div>
+    <div class="cmd-rod">
+      <span class="nota" style="opacity:.7">Troque o que está destacado pelos seus dados.</span>
+      <button class="copiar" id="copiar" type="button">Copiar prompt</button>
+    </div>
+  </div>
+</section>
+
+<section class="faixa">
+  <div class="miolo">
+    <div class="olho">Para saber se combina</div>
+    <h2>É a sua cara?</h2>
+    <div class="pra">
+      <div><h3>Combina com você se</h3><ul>
+        <li>Tem restaurante, lanchonete, padaria, pizzaria ou vende marmita</li>
+        <li>Cuida do Instagram e do WhatsApp no intervalo do serviço</li>
+        <li>Já abriu o ChatGPT e não soube o que pedir</li>
+        <li>Quer conferir preço e margem sem montar planilha</li></ul></div>
+      <div class="nao"><h3>Talvez não seja para você se</h3><ul>
+        <li>Procura um curso em vídeo. Aqui é uma biblioteca para consultar quando precisar.</li>
+        <li>Prefere não publicar nada. Os prompts ajudam a escrever, e a publicação continua com você.</li>
+        <li>Já tem uma agência cuidando de todo o seu conteúdo</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="faixa oferta" id="oferta">
+  <div class="miolo">
+    <div>
+      <div class="olho">Pagamento único</div>
+      <h2>Tudo o que vem na comanda</h2>
+      <ul>
+        <li>207 prompts completos em 10 capítulos, organizados num site só seu</li>
+        <li>Busca por função, preenchimento guiado e exportação para o ChatGPT</li>
+        <li>36 prompts que analisam fotos do cardápio, da fachada, do prato, de prints e de notas</li>
+        <li>31 projetos grandes, como o texto do site, um plano de marketing e o manual da equipe</li>
+        <li>7 dias para pedir o dinheiro de volta, se não for o que você esperava</li>
+      </ul>
+      <div class="acoes"><a class="btn js-comprar" href="#oferta">Quero experimentar</a><span class="nota js-status">Pagamento único de R$ 9,99</span></div>
+    </div>
+    <div class="preco"><small>R$</small>9<small style="font-size:.45em;vertical-align:top">,99</small></div>
+  </div>
+</section>
+
+<section class="faixa">
+  <div class="miolo">
+    <div class="olho">Dúvidas</div>
+    <h2>Perguntas frequentes</h2>
+    <div class="faq">
+      <details><summary>Preciso pagar alguma IA?</summary><p>Não. A biblioteca foi feita para o ChatGPT gratuito e funciona também no Claude e no Gemini. Os prompts com foto usam o envio de imagens, que o plano gratuito permite com limite diário.</p></details>
+      <details><summary>Como recebo a biblioteca?</summary><p>Assim que o pagamento é confirmado, o acesso chega no seu e-mail. Pelo Pix ou cartão, a confirmação costuma sair na hora.</p></details>
+      <details><summary>Funciona para o meu tipo de negócio?</summary><p>Os prompts foram escritos para restaurantes, lanchonetes, padarias, pizzarias, hamburguerias, docerias e marmitarias. Você preenche a ficha do negócio uma vez e cada texto sai com o seu jeito.</p></details>
+      <details><summary>E se eu não gostar?</summary><p>Tudo bem. Você tem 7 dias para pedir o reembolso integral pela própria plataforma de pagamento, como prevê o Código de Defesa do Consumidor.</p></details>
+      <details><summary>A IA vai inventar coisa sobre meu negócio?</summary><p>Cada prompt pede que a IA use só o que você informou e marque com [CONFIRMAR] o que estiver faltando. Mesmo assim, vale dar uma conferida em preços e números antes de publicar.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>Cardápio que Vende · biblioteca digital de prompts · conteúdo criado com o Claude</footer>
+
+<script>
+// Link do checkout (Kiwify, Hotmart ou Mercado Pago). Enquanto vazio, os botões levam à oferta e avisam.
+const CHECKOUT_URL = "";
+
+const PROMPTS = ["Você vai agir como redator de cardápios com 15 anos de experiência em restaurantes brasileiros. Leia tudo antes de responder e siga as instruções na ordem.\n\n## CONTEXTO DO MEU NEGÓCIO\n- Nome do negócio: [Nome do negócio]\n- Tipo de negócio: [Tipo de negócio]\n- Cidade e bairro: [Cidade e bairro]\n- Público principal: [Público principal]\n- Faixa de preço: [Faixa de preço]\n- Diferenciais reais: [Diferenciais reais]\n- Tom de voz: [Tom de voz]\n- Onde você vende: [Onde você vende]\n\n## OBJETIVO\nCriar descrições curtas e apetitosas para um prato, que façam o cliente entender o que vai comer e sentir vontade de pedir.\n\n## O QUE UM ESPECIALISTA SABE (use como referência)\n- Cliente lê cardápio em poucos segundos: nomes claros e descrições curtas vendem mais que textos longos.\n- Descrição boa cita ingrediente principal, técnica de preparo e textura (crocante, cremoso, macio).\n- Os itens mais lucrativos devem aparecer primeiro na seção ou com destaque visual.\n- Preços alinhados à direita em coluna e sem cifrão em destaque fazem o cliente comparar menos por preço.\n- Cardápio grande demais aumenta o tempo de decisão, o estoque e o desperdício.\n\n## INFORMAÇÕES PARA ESTA TAREFA\n- Nome do prato: [Nome do prato]\n- Ingredientes principais: [Ingredientes principais]\n- Detalhe de preparo que vale destacar: [Detalhe de preparo que vale destacar]\n- Preço do prato: [Preço do prato]\n\n## COMO FAZER (siga as etapas na ordem)\n1. Identifique o ingrediente ou detalhe que mais diferencia este prato.\n2. Liste 3 palavras de textura e 3 de sabor que combinam com os ingredientes reais.\n3. Escreva 3 versões de descrição: uma curta, uma média e uma que conta a origem ou o preparo.\n4. Revise cortando adjetivos vazios e palavras repetidas.\n\n## FORMATO DA RESPOSTA\nTrês versões numeradas. Versão 1 com até 90 caracteres, versão 2 com até 160, versão 3 com até 250. Depois, uma linha dizendo qual você recomenda para cardápio impresso e qual para o iFood.\n\n## REGRAS\n- Escreva em português do Brasil, com linguagem simples, como um dono de negócio fala no balcão.\n- Use somente as informações que eu passei. Não invente preços, ingredientes, prêmios, números, avaliações ou depoimentos.\n- Se faltar alguma informação importante, escreva [CONFIRMAR: o que falta] no lugar, em vez de inventar.\n- Evite exageros vazios como \"o melhor da cidade\", \"incrível\", \"imperdível\" e \"sabor inesquecível\".\n\n## ANTES DE ENTREGAR, CONFIRA\n- Nenhum ingrediente foi adicionado além dos que eu passei.\n- As contagens de caracteres foram respeitadas.\n- Todas as informações do meu negócio que eu passei foram usadas corretamente.\n- Nada foi inventado. O que faltou está marcado com [CONFIRMAR].\n\nNo final, pergunte se eu quero ajustar o tom, o tamanho ou alguma informação, e sugira 1 próximo passo prático.", "Você vai agir como gerente de reputação de restaurantes. Leia tudo antes de responder e siga as instruções na ordem.\n\n## CONTEXTO DO MEU NEGÓCIO\n- Nome do negócio: [Nome do negócio]\n- Tipo de negócio: [Tipo de negócio]\n- Cidade e bairro: [Cidade e bairro]\n- Público principal: [Público principal]\n- Faixa de preço: [Faixa de preço]\n- Diferenciais reais: [Diferenciais reais]\n- Tom de voz: [Tom de voz]\n\n## OBJETIVO\nResponder publicamente uma avaliação negativa sem brigar e mostrando cuidado.\n\n## O QUE UM ESPECIALISTA SABE (use como referência)\n- No aplicativo, foto, nota, tempo de entrega e taxa decidem o clique antes do cardápio.\n- Nomes de itens com o termo que o cliente digita aparecem mais na busca.\n- Respostas educadas a avaliações negativas são lidas por novos clientes e passam confiança.\n- Preço no app costuma precisar compensar a taxa da plataforma.\n- Atrasos e itens faltando são as causas mais comuns de nota baixa.\n\n## INFORMAÇÕES PARA ESTA TAREFA\n- Avaliação do cliente: [Avaliação do cliente]\n- O que de fato aconteceu: [O que de fato aconteceu]\n- O que vamos fazer: [O que vamos fazer]\n\n## COMO FAZER (siga as etapas na ordem)\n1. Reconheça o problema sem culpar o cliente nem a equipe.\n2. Explique a solução de forma concreta.\n3. Convide para dar outra chance.\n4. Escreva 3 versões de até 400 caracteres.\n\n## FORMATO DA RESPOSTA\nTrês respostas e qual usar.\n\n## REGRAS\n- Escreva em português do Brasil, com linguagem simples, como um dono de negócio fala no balcão.\n- Use somente as informações que eu passei. Não invente preços, ingredientes, prêmios, números, avaliações ou depoimentos.\n- Se faltar alguma informação importante, escreva [CONFIRMAR: o que falta] no lugar, em vez de inventar.\n- Evite exageros vazios como \"o melhor da cidade\", \"incrível\", \"imperdível\" e \"sabor inesquecível\".\n- Nunca exponha dados do pedido ou do cliente na resposta pública.\n\n## ANTES DE ENTREGAR, CONFIRA\n- Todas as informações do meu negócio que eu passei foram usadas corretamente.\n- Nada foi inventado. O que faltou está marcado com [CONFIRMAR].\n\nNo final, pergunte se eu quero ajustar o tom, o tamanho ou alguma informação, e sugira 1 próximo passo prático.", "Você vai agir como consultor de varejo e comunicação visual. Leia tudo antes de responder e siga as instruções na ordem.\n\n## CONTEXTO DO MEU NEGÓCIO\n- Nome do negócio: [Nome do negócio]\n- Tipo de negócio: [Tipo de negócio]\n- Cidade e bairro: [Cidade e bairro]\n- Público principal: [Público principal]\n- Diferenciais reais: [Diferenciais reais]\n- Tom de voz: [Tom de voz]\n\n## OBJETIVO\nSaber se minha fachada atrai quem passa na rua.\n\n## O QUE UM ESPECIALISTA SABE (use como referência)\n- A IA só deve usar o que está visível na imagem; o resto é suposição.\n- Foto boa de comida: luz natural lateral, fundo limpo, prato inteiro ou close no detalhe.\n- Para ler textos em foto, a imagem precisa estar reta, nítida e iluminada.\n- Antes de enviar, apague dados pessoais de clientes que aparecerem em prints.\n- Várias fotos do mesmo assunto permitem comparação e escolha melhor.\n\n## IMAGEM ANEXADA\nAnexei a esta mensagem: uma foto da fachada tirada do outro lado da rua.\nAntes de qualquer coisa, descreva em até 4 linhas o que você vê na imagem. Use apenas o que está visível. Se a imagem estiver escura, cortada ou ilegível, diga o que não conseguiu ver e peça outra foto antes de continuar.\n\n## COMO FAZER (siga as etapas na ordem)\n1. Leia placa, letreiro e informações visíveis.\n2. Avalie leitura de longe, iluminação, convite para entrar.\n3. Liste 8 melhorias, das mais baratas às mais caras.\n\n## FORMATO DA RESPOSTA\nAvaliação e melhorias.\n\n## REGRAS\n- Escreva em português do Brasil, com linguagem simples, como um dono de negócio fala no balcão.\n- Use somente as informações que eu passei. Não invente preços, ingredientes, prêmios, números, avaliações ou depoimentos.\n- Se faltar alguma informação importante, escreva [CONFIRMAR: o que falta] no lugar, em vez de inventar.\n- Evite exageros vazios como \"o melhor da cidade\", \"incrível\", \"imperdível\" e \"sabor inesquecível\".\n\n## ANTES DE ENTREGAR, CONFIRA\n- Todas as informações do meu negócio que eu passei foram usadas corretamente.\n- Nada foi inventado. O que faltou está marcado com [CONFIRMAR].\n\nNo final, pergunte se eu quero ajustar o tom, o tamanho ou alguma informação, e sugira 1 próximo passo prático."];
+const cmd = document.getElementById('cmd');
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let atual = 0;
+function mostra(i) {
+  atual = i;
+  cmd.innerHTML = esc(PROMPTS[i]).replace(/\[([^\]]+)\]/g, '<span class="ph">[$1]</span>');
+  cmd.setAttribute('aria-labelledby', 'aba-' + i);
+  document.querySelectorAll('.aba').forEach(b => b.setAttribute('aria-selected', String(+b.dataset.i === i)));
+}
+document.querySelectorAll('.aba').forEach(b => b.addEventListener('click', () => mostra(+b.dataset.i)));
+mostra(0);
+
+const btnCopiar = document.getElementById('copiar');
+btnCopiar.addEventListener('click', () => {
+  const ok = () => { btnCopiar.textContent = 'Copiado'; setTimeout(() => btnCopiar.textContent = 'Copiar prompt', 1800); };
+  const seleciona = () => { const r = document.createRange(); r.selectNodeContents(cmd); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btnCopiar.textContent = 'Selecionado: use Ctrl+C'; };
+  try { navigator.clipboard.writeText(PROMPTS[atual]).then(ok, seleciona); } catch (e) { seleciona(); }
+});
+
+document.querySelectorAll('.js-comprar').forEach(a => {
+  if (CHECKOUT_URL) { a.href = CHECKOUT_URL; a.target = '_blank'; a.rel = 'noopener'; return; }
+  if (a.closest('#oferta')) {
+    a.setAttribute('aria-disabled', 'true');
+    a.addEventListener('click', ev => { ev.preventDefault(); document.querySelector('.js-status').textContent = 'As vendas abrem em breve. Obrigado pela paciência.'; });
+  }
+});
+</script>

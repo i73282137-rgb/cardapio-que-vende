@@ -1,0 +1,829 @@
+<title>Cardápio que Vende · Área do Comprador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Layout: barra de topo escura com abas; biblioteca em cards; painel de preencher = formulário + comanda (prévia) lado a lado, empilhados no celular */
+:root {
+  --papel:#FBF8F1; --tinta:#1D1A16; --tomate:#C8372D; --manjericao:#2E5E3A; --mostarda:#F2C230;
+  --cinza:#6B6458; --linha:#DED6C6; --cartao:#FFFFFF; --realce:#FCEBB0; --ok-fundo:#DCEBDC; --topo:#1D1A16; --topo-txt:#EDE6D8;
+  --sombra:0 1px 0 rgba(29,26,22,.06), 0 8px 24px -12px rgba(29,26,22,.25);
+  --f-disp:'Archivo','Arial Black',system-ui,sans-serif; --f-texto:'Source Serif 4',Georgia,serif; --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --papel:#16130F; --tinta:#F1EBDF; --tomate:#E0574B; --manjericao:#5E9C6C; --mostarda:#F2C230; --cinza:#A99F8E; --linha:#38322A;
+  --cartao:#211D18; --realce:#5A4A12; --ok-fundo:#1E3A26; --topo:#0E0C09; --topo-txt:#EDE6D8; --sombra:0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark } }
+:root[data-theme="dark"] {
+  --papel:#16130F; --tinta:#F1EBDF; --tomate:#E0574B; --manjericao:#5E9C6C; --mostarda:#F2C230; --cinza:#A99F8E; --linha:#38322A;
+  --cartao:#211D18; --realce:#5A4A12; --ok-fundo:#1E3A26; --topo:#0E0C09; --topo-txt:#EDE6D8; --sombra:0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark }
+* { box-sizing:border-box }
+[hidden] { display:none !important }
+body { margin:0; background:var(--papel); color:var(--tinta); font:17px/1.55 var(--f-texto) }
+button, input, textarea, select { font:inherit; color:inherit }
+button { cursor:pointer }
+:focus-visible { outline:3px solid var(--mostarda); outline-offset:2px }
+h1, h2, h3 { text-wrap:balance }
+
+/* Topo */
+.topo { background:var(--topo); color:var(--topo-txt); position:sticky; top:env(safe-area-inset-top,0px); z-index:20 }
+.topo-in { max-width:1180px; margin:0 auto; padding:12px 16px; display:flex; flex-wrap:wrap; align-items:center; gap:10px 22px }
+.marca { font:900 20px/.95 var(--f-disp); text-transform:uppercase; letter-spacing:-.01em }
+.marca small { display:block; font:600 10px var(--f-mono); letter-spacing:.16em; color:var(--mostarda); margin-bottom:4px }
+.abas { display:flex; gap:4px; flex:1 1 auto }
+.abas button { background:none; border:0; border-bottom:3px solid transparent; color:inherit; font:700 15px var(--f-disp); padding:8px 10px; display:flex; gap:6px; align-items:center }
+.abas button[aria-current="true"] { border-bottom-color:var(--mostarda) }
+.abas button:hover { background:rgba(255,255,255,.06) }
+.abas .cont { font:600 11px var(--f-mono); background:var(--mostarda); color:#1D1A16; padding:1px 6px; border-radius:9px }
+.prog { font:12px var(--f-mono); min-width:150px }
+.barra { height:6px; background:rgba(127,127,127,.25); margin-top:5px; overflow:hidden }
+.barra i { display:block; height:100%; width:0; background:var(--mostarda); transition:width .3s }
+.barra.verde i { background:var(--manjericao) }
+.topo .barra.verde i { background:var(--mostarda) }
+
+/* Página */
+.pag { max-width:1180px; margin:0 auto; padding-inline:16px; padding-block:28px 96px }
+.olho { font:600 12px var(--f-mono); letter-spacing:.14em; text-transform:uppercase; color:var(--tomate) }
+h1 { font:900 clamp(30px,5vw,48px)/.98 var(--f-disp); text-transform:uppercase; letter-spacing:-.02em; margin:6px 0 10px }
+h2 { font:800 22px/1.15 var(--f-disp); margin:0 0 12px }
+.lead { color:var(--cinza); max-width:62ch; margin:0 0 22px }
+.b { font:700 15px var(--f-disp); padding:10px 16px; border:1.5px solid var(--tinta); background:transparent; min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; color:inherit }
+.b.pri { background:var(--tinta); color:var(--papel) }
+.b.tom { background:var(--tomate); border-color:var(--tomate); color:#fff }
+.b.peq { font-size:13px; padding:6px 10px; min-height:36px }
+.b:disabled { opacity:.45; cursor:default }
+.link { background:none; border:0; padding:0; color:var(--tomate); font:600 15px var(--f-texto); text-decoration:underline; text-underline-offset:3px }
+.mono { font-family:var(--f-mono) }
+
+/* Campos (ficha e painel) */
+.campos { display:grid; gap:18px; align-items:start }
+.campos.duas { grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)) }
+.campo { display:grid; gap:6px; align-content:start; min-width:0; padding-left:12px; border-left:4px solid var(--realce) }
+.campo.ok { border-left-color:var(--manjericao) }
+.campos.duas .campo:has(.opcs) { grid-column:1 / -1 }
+.rot { font:700 16px var(--f-disp) }
+.rot .st { font:600 11px var(--f-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--cinza); margin-left:6px }
+.campo.ok .rot .st { color:var(--manjericao) }
+.in { width:100%; height:auto; align-self:start; padding:11px 12px; border:1.5px solid var(--linha); background:var(--cartao); font:16px/1.45 var(--f-mono); border-radius:0 }
+.in::placeholder { color:var(--cinza); opacity:.8 }
+textarea.in { min-height:96px; resize:vertical }
+.in:focus { outline:3px solid var(--mostarda); outline-offset:0; border-color:var(--tinta) }
+.opcs { display:flex; flex-wrap:wrap; gap:8px }
+.opc { position:relative }
+.opc input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer }
+.opc span { display:inline-block; padding:8px 12px; border:1.5px solid var(--linha); background:var(--cartao); font:14px var(--f-mono); min-height:40px; line-height:22px }
+.opc input:checked + span { background:var(--tinta); color:var(--papel); border-color:var(--tinta) }
+.opc input:focus-visible + span { outline:3px solid var(--mostarda); outline-offset:2px }
+
+/* Comece aqui */
+.ficha-wrap { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:36px; align-items:start }
+.ficha-card { background:var(--cartao); border:1px solid var(--linha); padding:22px; box-shadow:var(--sombra); display:grid; gap:18px }
+.ficha-prog { display:flex; justify-content:space-between; align-items:center; gap:12px; font:600 14px var(--f-mono) }
+.ficha-prog .barra { flex:1; max-width:260px; margin:0 }
+.salvo { font:12px var(--f-mono); color:var(--cinza); margin:0 }
+.ficha-card > .b { justify-self:start }
+.lado { display:grid; gap:26px }
+.passos { list-style:none; margin:0; padding:0; display:grid; gap:14px; counter-reset:p }
+.passos li { counter-increment:p; display:grid; grid-template-columns:34px 1fr; gap:10px; align-items:start; font-size:16px }
+.passos li::before { content:counter(p); font:900 18px/34px var(--f-disp); text-align:center; background:var(--mostarda); color:#1D1A16; height:34px }
+.passos b { font-family:var(--f-disp) }
+.cuid { margin:0; padding-left:18px; color:var(--cinza); font-size:15px } .cuid li { margin-bottom:8px }
+
+/* Biblioteca */
+.oque { background:var(--cartao); border:1px solid var(--linha); padding:18px; box-shadow:var(--sombra); margin-bottom:18px }
+.oque label { font:800 20px var(--f-disp); display:block; margin-bottom:10px }
+.oque-campo { display:flex; gap:8px }
+.oque-campo .in { font-size:17px; padding:13px 14px }
+.objs { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center }
+.objs-rot { font:600 12px var(--f-mono); color:var(--cinza) }
+.obj { font:600 13px var(--f-mono); padding:7px 11px; border:1.5px dashed var(--linha); background:transparent; min-height:36px }
+.obj:hover { border-color:var(--tinta) }
+.filtros { display:grid; gap:12px; margin-bottom:16px }
+.chips { display:flex; flex-wrap:wrap; gap:6px }
+.chip { font:600 13px var(--f-mono); padding:7px 11px; border:1.5px solid var(--linha); background:var(--cartao); min-height:36px }
+.chip[aria-pressed="true"] { background:var(--tinta); color:var(--papel); border-color:var(--tinta) }
+.chip .q { opacity:.6 }
+.linha-f { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+.sel-cap { padding:8px 10px; border:1.5px solid var(--linha); background:var(--cartao); font:14px var(--f-mono); min-height:38px; max-width:100% }
+.res { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-top:2px solid var(--tinta); margin-bottom:14px }
+.res-n { font:800 18px var(--f-disp) }
+.res-n small { font:13px var(--f-mono); color:var(--cinza); font-weight:400 }
+.aviso-ficha { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; background:var(--realce); padding:10px 14px; margin-bottom:16px; font-size:15px }
+
+.lista { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr)); gap:14px }
+.card { background:var(--cartao); border:1px solid var(--linha); border-top:5px solid var(--mostarda); padding:16px 18px; display:flex; flex-direction:column; gap:8px; min-width:0 }
+.card.usado { border-top-color:var(--manjericao) }
+.card.sel { outline:2px solid var(--tinta) }
+.card-cab { display:flex; align-items:center; gap:10px; font:12px var(--f-mono); color:var(--cinza) }
+.num { font:600 12px var(--f-mono); background:var(--tinta); color:var(--papel); padding:2px 7px; white-space:nowrap }
+.card-cab .cap { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.fav { background:none; border:0; font-size:22px; line-height:1; color:var(--linha); padding:4px; min-width:36px; min-height:36px }
+.fav[aria-pressed="true"] { color:var(--mostarda) }
+.card h3 { margin:0; font:800 19px/1.2 var(--f-disp) }
+.card h3 button { all:unset; cursor:pointer } .card h3 button:hover { text-decoration:underline } .card h3 button:focus-visible { outline:3px solid var(--mostarda) }
+.resumo { margin:0; font-size:15.5px; color:var(--cinza) }
+.tags { display:flex; flex-wrap:wrap; gap:6px; font:12px var(--f-mono); color:var(--cinza) }
+.tags span { border:1px solid var(--linha); padding:1px 6px }
+.selo { background:var(--tomate); color:#fff; font:700 12px var(--f-mono); padding:3px 8px; display:inline-flex; gap:5px; align-items:center }
+.card-pe { margin-top:auto; padding-top:8px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; border-top:1px dashed var(--linha) }
+.chk { display:inline-flex; gap:7px; align-items:center; font:13px var(--f-mono); color:var(--cinza); cursor:pointer; min-height:36px }
+.chk input { accent-color:var(--manjericao); width:18px; height:18px; margin:0 }
+.usado-tag { font:600 12px var(--f-mono); color:var(--manjericao) }
+.mais { display:flex; justify-content:center; margin-top:20px }
+.vazio { padding:30px 0; color:var(--cinza); font-family:var(--f-mono) }
+
+/* Painel de preencher */
+.p-topo { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin-bottom:14px }
+.p-meta { font:13px var(--f-mono); color:var(--cinza) }
+.p-tit { font:900 clamp(26px,4.2vw,40px)/1.02 var(--f-disp); text-transform:none; letter-spacing:-.015em; margin:4px 0 8px }
+.foto { border:2px solid var(--tomate); padding:14px 16px; margin:16px 0 0; display:grid; gap:8px; max-width:760px }
+.foto b { font:800 16px var(--f-disp); color:var(--tomate) }
+.foto ol { margin:0; padding-left:20px; display:grid; gap:4px; font-size:16px }
+.p-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:28px; align-items:start; margin-top:20px }
+.p-form { display:grid; gap:18px; min-width:0 }
+.p-cont { display:flex; justify-content:space-between; gap:12px; align-items:center; font:600 15px var(--f-mono) }
+.p-form > .barra { margin-top:-14px }
+.so-cel { display:none; font:600 14px var(--f-mono) }
+.sem-campos { background:var(--ok-fundo); padding:12px 14px; font-size:15px; margin:0 }
+.ficha-bloco { border:1.5px solid var(--linha); background:var(--cartao) }
+.ficha-bloco summary { cursor:pointer; padding:12px 14px; font:700 15px var(--f-disp); display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; list-style:none }
+.ficha-bloco summary::-webkit-details-marker { display:none }
+.ficha-bloco summary::after { content:"Abrir ▾"; font:600 12px var(--f-mono); color:var(--cinza) }
+.ficha-bloco[open] summary::after { content:"Fechar ▴" }
+.ficha-bloco .st { font:600 12px var(--f-mono); color:var(--manjericao); margin-left:auto }
+.ficha-bloco .st.falta { color:var(--tomate) }
+.ficha-in { padding:4px 14px 16px; display:grid; gap:16px; justify-items:start }
+.ficha-in .campos { width:100% }
+
+/* Comanda (prévia) */
+.comanda-col { position:sticky; top:calc(env(safe-area-inset-top,0px) + 76px); min-width:0 }
+.comanda { background:var(--cartao); box-shadow:var(--sombra); position:relative; padding:22px 20px 18px }
+.comanda::before, .comanda::after { content:""; position:absolute; left:0; right:0; height:8px; background:radial-gradient(circle at 6px 0, var(--papel) 5px, transparent 5.5px) 0 0/12px 8px repeat-x }
+.comanda::before { top:0 }
+.comanda::after { bottom:0; transform:rotate(180deg) }
+.comanda-cab { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; font:600 11px var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--cinza); padding-bottom:10px; border-bottom:1.5px dashed var(--linha); margin-bottom:12px }
+.leg { display:flex; gap:8px; text-transform:none; letter-spacing:0 }
+.leg mark { cursor:default }
+.previa { font:13.5px/1.65 var(--f-mono); white-space:pre-wrap; overflow-wrap:anywhere; margin:0; max-height:calc(100vh - 300px); overflow:auto }
+mark { color:inherit; padding:0 3px; cursor:pointer; font-weight:600 }
+mark.ok { background:var(--ok-fundo); box-shadow:inset 0 -2px 0 var(--manjericao) }
+mark.falta { background:var(--realce); box-shadow:inset 0 -2px 0 var(--mostarda) }
+.previa mark.falta::before { content:"✎ " }
+
+.copiar-barra { position:sticky; bottom:0; z-index:15; margin-top:22px; background:var(--papel); border-top:2px solid var(--tinta); padding-block:12px calc(12px + env(safe-area-inset-bottom,0px)); display:grid; gap:10px }
+.cb-linha { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between }
+.cb-linha .b.tom { font-size:17px; padding:12px 22px }
+.cb-info { display:flex; flex-wrap:wrap; gap:4px 16px; align-items:center; font:600 13px var(--f-mono) }
+.falta-aviso { border:2px solid var(--tomate); background:var(--cartao); padding:12px 14px; display:grid; gap:10px; font-size:15.5px; max-height:45vh; overflow:auto }
+.falta-aviso .acoes { display:flex; flex-wrap:wrap; gap:8px }
+.pos { background:var(--ok-fundo); padding:12px 14px; display:grid; gap:6px; font-size:15.5px; max-height:50vh; overflow:auto }
+.pos b { font-family:var(--f-disp) }
+.pos ol { margin:0; padding-left:20px }
+.manual { width:100%; min-height:140px; font:13px var(--f-mono); padding:10px; border:1.5px solid var(--tinta); background:var(--cartao) }
+
+/* Exportar */
+.exp { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start }
+.exp-passo { display:grid; gap:12px; margin-bottom:26px; min-width:0 }
+.exp-passo h2 { display:flex; gap:10px; align-items:center; margin:0 }
+.exp-passo h2 i { font:900 15px/28px var(--f-disp); font-style:normal; width:28px; text-align:center; background:var(--mostarda); color:#1D1A16 }
+.opcao { display:grid; grid-template-columns:22px 1fr; gap:10px; padding:14px; border:1.5px solid var(--linha); background:var(--cartao); cursor:pointer }
+.opcao:has(input:checked) { border-color:var(--tinta); box-shadow:inset 4px 0 0 var(--tomate) }
+.opcao input { accent-color:var(--tomate); width:18px; height:18px; margin:3px 0 0 }
+.opcao b { font:800 16px var(--f-disp); display:block }
+.opcao span { font-size:15px; color:var(--cinza) }
+.caps-exp { display:grid; gap:2px }
+.caps-exp .chk { color:var(--tinta); font-size:14px }
+.tam { font:600 14px var(--f-mono); display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between }
+.tam-alerta { border-left:4px solid var(--tomate); background:var(--cartao); padding:10px 12px; font-size:15px }
+.saida { width:100%; min-height:340px; font:12.5px/1.55 var(--f-mono); padding:12px; border:1.5px solid var(--linha); background:var(--cartao); resize:vertical }
+.exp-acoes { display:flex; flex-wrap:wrap; gap:8px }
+.nota { font:13px var(--f-mono); color:var(--cinza); margin:0 }
+
+.toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(100px + env(safe-area-inset-bottom,0px)); background:var(--tinta); color:var(--papel); font:600 14px var(--f-mono); padding:10px 16px; z-index:40; max-width:calc(100% - 32px) }
+
+@media (max-width:900px) {
+  .ficha-wrap, .exp { grid-template-columns:1fr }
+  .p-grid { grid-template-columns:1fr }
+  .comanda-col { position:static }
+  .previa { max-height:none }
+  .so-cel { display:inline }
+}
+@media (max-width:560px) {
+  body { font-size:16px }
+  .topo-in { gap:6px 12px; padding-block:10px 0 }
+  .marca { font-size:16px }
+  .prog { flex:1 1 120px; min-width:0; text-align:right }
+  .abas { order:3; flex:1 1 100%; justify-content:space-between }
+  .abas button { font-size:14px; padding:8px 4px 10px }
+  .oque-campo { flex-direction:column }
+  .chips { flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; margin-inline:-16px; padding-inline:16px }
+  .chip { white-space:nowrap }
+  .cb-linha .b.tom { flex:1 1 100% }
+  .ficha-card { padding:16px }
+  .comanda { padding-inline:14px }
+}
+@media (prefers-reduced-motion: reduce) { .barra i { transition:none } }
+</style>
+
+<header class="topo">
+  <div class="topo-in">
+    <div class="marca"><small>Área do comprador</small>Cardápio que Vende</div>
+    <nav class="abas" aria-label="Seções">
+      <button type="button" data-aba="inicio">Comece aqui</button>
+      <button type="button" data-aba="prompts">Prompts</button>
+      <button type="button" data-aba="exportar">Exportar <span class="cont" id="cont-sel" hidden>0</span></button>
+    </nav>
+    <div class="prog"><span id="prog-txt">0 usados</span><div class="barra verde"><i id="prog-barra"></i></div></div>
+  </div>
+</header>
+
+<main class="pag">
+  <!-- COMECE AQUI -->
+  <section id="v-inicio" hidden>
+    <div class="olho">Comece aqui · leva 3 minutos</div>
+    <h1>A ficha do seu negócio</h1>
+    <p class="lead">Preencha uma vez. Todos os prompts usam estes dados sozinhos, e você só completa o que é da tarefa. Fica salvo neste aparelho.</p>
+    <div class="ficha-wrap">
+      <div class="ficha-card">
+        <div class="ficha-prog"><span id="ficha-prog-txt">0 de 8 preenchidos</span><div class="barra verde"><i id="ficha-prog-barra"></i></div></div>
+        <div class="campos duas" id="ficha-campos"></div>
+        <p class="salvo">Salvo automaticamente enquanto você digita.</p>
+        <button type="button" class="b pri" data-ir="prompts">Pronto, ver os prompts →</button>
+      </div>
+      <div class="lado">
+        <div>
+          <h2>Como usar</h2>
+          <ol class="passos">
+            <li><span><b>Escolha o que quer fazer.</b> Escreva do seu jeito, como “responder cliente bravo”, ou toque num objetivo pronto.</span></li>
+            <li><span><b>Complete os campos da tarefa.</b> A prévia mostra em verde o que já está pronto e em amarelo o que falta.</span></li>
+            <li><span><b>Copie e cole no ChatGPT.</b> Funciona no plano gratuito. Se pedir foto, anexe antes de enviar.</span></li>
+          </ol>
+        </div>
+        <div>
+          <h2>Cuidados</h2>
+          <ul class="cuid">
+            <li>Confira preços, horários e contas antes de publicar. A IA erra números com confiança.</li>
+            <li>Não peça para a IA inventar depoimentos ou avaliações. Além de antiético, é proibido pelo Código de Defesa do Consumidor e pelas regras do iFood e do Google.</li>
+            <li>Não cole dados pessoais de clientes (CPF, endereço completo) no chat da IA.</li>
+            <li>Leia o texto em voz alta. Se não soa como você falaria no balcão, peça para ajustar o tom.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIBLIOTECA -->
+  <section id="v-prompts" hidden>
+    <div id="aviso-ficha"></div>
+    <div class="oque">
+      <label for="q">O que você quer fazer hoje?</label>
+      <div class="oque-campo">
+        <input id="q" class="in" type="search" autocomplete="off" placeholder="Ex.: responder cliente bravo, post para sexta">
+        <button type="button" class="b" id="q-limpar" hidden>Limpar</button>
+      </div>
+      <div class="objs" id="objs"></div>
+    </div>
+    <div class="filtros">
+      <div class="chips" id="chips-func" role="group" aria-label="Filtrar por função"></div>
+      <div class="linha-f">
+        <select id="f-cap" class="sel-cap" aria-label="Filtrar por capítulo"></select>
+        <button type="button" class="chip" id="f-img" aria-pressed="false">📷 Com imagem</button>
+        <button type="button" class="chip" id="f-fav" aria-pressed="false">★ Favoritos</button>
+        <button type="button" class="chip" id="f-nusado" aria-pressed="false">Ainda não usei</button>
+        <button type="button" class="link" id="f-limpar" hidden>Limpar filtros</button>
+      </div>
+    </div>
+    <div class="res">
+      <div class="res-n" id="res-n" aria-live="polite">0 prompts</div>
+      <div class="linha-f">
+        <button type="button" class="b peq" id="sel-filtro">Selecionar todos do filtro</button>
+        <button type="button" class="b peq pri" id="ir-exportar" hidden>Exportar selecionados</button>
+      </div>
+    </div>
+    <div class="lista" id="lista"></div>
+    <div class="mais"><button type="button" class="b" id="mais" hidden>Mostrar mais</button></div>
+  </section>
+
+  <!-- PAINEL DE PREENCHER -->
+  <section id="v-painel" hidden>
+    <div class="p-topo">
+      <button type="button" class="b peq" id="voltar">← Voltar para a lista</button>
+      <span class="p-meta" id="p-meta"></span>
+    </div>
+    <div class="olho" id="p-olho"></div>
+    <h1 class="p-tit" id="p-tit"></h1>
+    <p class="lead" id="p-resumo" style="margin-bottom:0"></p>
+    <div id="p-foto"></div>
+    <div class="p-grid">
+      <form class="p-form" id="p-form" autocomplete="off">
+        <div class="p-cont"><span id="p-cont">0 de 0 campos preenchidos</span><button type="button" class="link so-cel" id="ver-previa">Ver prévia ↓</button><button type="button" class="fav" id="p-fav" aria-pressed="false" aria-label="Favoritar">★</button></div>
+        <div class="barra verde"><i id="p-barra"></i></div>
+        <div class="campos" id="p-campos"></div>
+        <details class="ficha-bloco" id="p-ficha">
+          <summary><span>Dados do seu negócio (ficha)</span><span class="st" id="p-ficha-st"></span></summary>
+          <div class="ficha-in"><div class="campos" id="p-ficha-campos"></div>
+            <button type="button" class="link" data-ir="inicio">Editar a ficha na tela Comece aqui</button></div>
+        </details>
+      </form>
+      <div class="comanda-col">
+        <div class="comanda">
+          <div class="comanda-cab"><span>Prévia do prompt</span><span class="leg"><mark class="ok">pronto</mark><mark class="falta">falta</mark></span></div>
+          <pre class="previa" id="previa"></pre>
+        </div>
+      </div>
+    </div>
+    <div class="copiar-barra">
+      <div class="falta-aviso" id="falta" hidden></div>
+      <div class="pos" id="pos" hidden></div>
+      <div class="cb-linha">
+        <div class="cb-info"><span id="p-cont2"></span><label class="chk"><input type="checkbox" id="p-usado"> Já usei</label></div>
+        <button type="button" class="b tom" id="copiar">Copiar prompt pronto</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPORTAR -->
+  <section id="v-exportar" hidden>
+    <div class="olho">Para usar no ChatGPT de uma vez</div>
+    <h1>Exportar biblioteca</h1>
+    <p class="lead">Gere um arquivo de texto para anexar ou colar no ChatGPT. Ele já vem com a instrução para o ChatGPT entender a biblioteca.</p>
+    <div class="exp">
+      <div>
+        <div class="exp-passo">
+          <h2><i>1</i>O que exportar</h2>
+          <label class="opcao"><input type="radio" name="exp-tipo" value="nav" checked><div><b>Navegador da biblioteca (leve)</b><span>Índice com todos os prompts: número, título, resumo e se precisa de foto. Você diz o objetivo e o ChatGPT indica qual prompt usar. Ideal para o plano gratuito.</span></div></label>
+          <label class="opcao"><input type="radio" name="exp-tipo" value="completo"><div><b>Prompts completos</b><span>O texto inteiro dos prompts que você escolher. Depois é só pedir “use o prompt Nº 12”.</span></div></label>
+        </div>
+        <div class="exp-passo" id="exp-quais">
+          <h2><i>2</i>Quais prompts</h2>
+          <p class="mono" id="exp-sel-txt" style="margin:0;font-size:14px"></p>
+          <div class="caps-exp" id="exp-caps"></div>
+          <div class="exp-acoes">
+            <button type="button" class="b peq" id="exp-todos">Selecionar todos</button>
+            <button type="button" class="b peq" id="exp-limpar">Limpar seleção</button>
+            <button type="button" class="b peq" data-ir="prompts">Escolher na lista</button>
+          </div>
+        </div>
+        <div class="exp-passo">
+          <h2><i id="exp-n-dados">3</i>Seus dados</h2>
+          <label class="opcao"><input type="radio" name="exp-dados" value="com" checked><div><b>Com meus dados preenchidos</b><span>Inclui a sua ficha e o que você já digitou nos campos.</span></div></label>
+          <label class="opcao"><input type="radio" name="exp-dados" value="sem"><div><b>Modelos em branco</b><span>Sem dados do seu negócio. O ChatGPT pergunta tudo na hora de usar.</span></div></label>
+        </div>
+      </div>
+      <div class="exp-passo">
+        <h2><i id="exp-n-arq">4</i>Seu arquivo</h2>
+        <div class="tam"><span id="exp-tam"></span><span class="mono" id="exp-nome" style="font-weight:400;color:var(--cinza)"></span></div>
+        <div class="tam-alerta" id="exp-alerta" hidden></div>
+        <div class="exp-acoes">
+          <button type="button" class="b tom" id="exp-baixar">Baixar arquivo .txt</button>
+          <button type="button" class="b" id="exp-copiar">Copiar tudo</button>
+        </div>
+        <p class="nota" id="exp-msg">No ChatGPT, toque no + ou no clipe e anexe o arquivo. Ou cole o texto copiado e envie.</p>
+        <label for="exp-saida" class="nota">Conteúdo do arquivo</label>
+        <textarea id="exp-saida" class="saida" readonly></textarea>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+const D = /*DADOS*/null;
+const P = D.prompts, TOTAL = P.length;
+const FICHA = D.ficha, FK = new Set(FICHA.map(f => f.k));
+const FUNC = Object.fromEntries(D.funcoes.map(f => [f.id, f]));
+const CAP = Object.fromEntries(D.capitulos.map(c => [c.id, c]));
+const PN = Object.fromEntries(P.map(p => [p.n, p]));
+const POR_PAG = 24, LIMITE = 60000;
+
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d } catch (e) { return d } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} }
+};
+const st = {
+  ficha: ls.get('cqv2-ficha', {}), campos: ls.get('cqv2-campos', {}),
+  usados: new Set(ls.get('cqv2-usados', [])), fav: new Set(ls.get('cqv2-fav', [])), sel: new Set(ls.get('cqv2-sel', [])),
+  aba: ls.get('cqv2-aba', null), f: { q: '', func: '', cap: '', img: false, fav: false, nusado: false }, mostrando: POR_PAG,
+  aberto: null, rolagem: 0
+};
+for (const s of ['usados', 'fav', 'sel']) for (const n of [...st[s]]) if (!PN[n]) st[s].delete(n);
+const salvar = s => ls.set('cqv2-' + s, st[s] instanceof Set ? [...st[s]] : st[s]);
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const nfmt = n => n.toLocaleString('pt-BR');
+const num = n => String(n).padStart(3, '0');
+const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+const valor = k => (FK.has(k) ? st.ficha[k] : st.campos[k]) || '';
+const cheio = k => !!valor(k).trim();
+function setValor(k, v) {
+  if (FK.has(k)) { st.ficha[k] = v; salvar('ficha') } else { st.campos[k] = v; salvar('campos') }
+}
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2600) }
+
+/* ---------- campos ---------- */
+function campoHTML(c, pref) {
+  const v = valor(c.k), id = pref + c.k, ok = !!v.trim();
+  const rot = `<span class="rot" id="${id}-l">${esc(c.rotulo)}<span class="st"> ${ok ? '✓ pronto' : 'falta'}</span></span>`;
+  let ctrl;
+  if (c.tipo === 'opcoes') {
+    const outro = ok && !(c.opcoes || []).includes(v);
+    ctrl = `<div class="opcs" role="radiogroup" aria-labelledby="${id}-l">${(c.opcoes || []).map(o =>
+      `<label class="opc"><input type="radio" name="${id}-r" value="${esc(o)}" data-ko="${c.k}"${v === o ? ' checked' : ''}><span>${esc(o)}</span></label>`).join('')
+      }<label class="opc"><input type="radio" name="${id}-r" value="" data-ko="${c.k}" data-outro="1"${outro ? ' checked' : ''}><span>Outro: escrever</span></label></div>
+      <input id="${id}" class="in" data-k="${c.k}" aria-labelledby="${id}-l" placeholder="Escreva aqui" value="${outro ? esc(v) : ''}"${outro ? '' : ' hidden'}>`;
+  } else if (c.tipo === 'longo') {
+    ctrl = `<textarea id="${id}" class="in" data-k="${c.k}" aria-labelledby="${id}-l" placeholder="${esc(c.exemplo || '')}">${esc(v)}</textarea>`;
+  } else {
+    ctrl = `<input id="${id}" class="in" data-k="${c.k}" aria-labelledby="${id}-l" placeholder="${esc(c.exemplo || '')}" value="${esc(v)}">`;
+  }
+  return `<div class="campo${ok ? ' ok' : ''}" data-campo="${c.k}">${rot}${ctrl}</div>`;
+}
+function marcaCampos(k) {
+  document.querySelectorAll(`[data-campo="${k}"]`).forEach(el => {
+    const ok = cheio(k); el.classList.toggle('ok', ok); el.querySelector('.st').textContent = ok ? ' ✓ pronto' : ' falta';
+  });
+}
+document.addEventListener('input', e => {
+  const k = e.target.dataset.k; if (!k) return;
+  setValor(k, e.target.value); depoisDeMudar(k);
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset.ko; if (!k) return;
+  const box = e.target.closest('.campo'), txt = box.querySelector('input.in');
+  if (e.target.dataset.outro) { txt.hidden = false; txt.focus(); setValor(k, txt.value) }
+  else { txt.hidden = true; txt.value = ''; setValor(k, e.target.value) }
+  depoisDeMudar(k);
+});
+function depoisDeMudar(k) {
+  marcaCampos(k);
+  if (st.aberto) atualizaPainel();
+  fichaProgresso();
+}
+
+/* ---------- topo, abas ---------- */
+function progresso() {
+  $('prog-txt').textContent = `${st.usados.size} de ${TOTAL} prompts usados`;
+  $('prog-barra').style.width = (TOTAL ? st.usados.size / TOTAL * 100 : 0) + '%';
+  const c = $('cont-sel'); c.textContent = st.sel.size; c.hidden = !st.sel.size;
+}
+function irPara(aba, semRolar) {
+  st.aberto = null; st.aba = aba; ls.set('cqv2-aba', aba);
+  document.querySelectorAll('.abas button').forEach(b => b.setAttribute('aria-current', b.dataset.aba === aba));
+  $('v-inicio').hidden = aba !== 'inicio'; $('v-prompts').hidden = aba !== 'prompts';
+  $('v-exportar').hidden = aba !== 'exportar'; $('v-painel').hidden = true;
+  if (aba === 'inicio') renderFicha();
+  if (aba === 'prompts') renderLista();
+  if (aba === 'exportar') renderExport();
+  if (!semRolar) window.scrollTo(0, 0);
+}
+document.querySelector('.abas').addEventListener('click', e => { const b = e.target.closest('button'); if (b) irPara(b.dataset.aba) });
+document.addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if (b) irPara(b.dataset.ir) });
+
+/* ---------- ficha ---------- */
+const fichaCheia = () => FICHA.filter(f => cheio(f.k)).length;
+function renderFicha() { $('ficha-campos').innerHTML = FICHA.map(c => campoHTML(c, 'ff-')).join(''); fichaProgresso() }
+function fichaProgresso() {
+  const n = fichaCheia();
+  $('ficha-prog-txt').textContent = `${n} de ${FICHA.length} preenchidos`;
+  $('ficha-prog-barra').style.width = (n / FICHA.length * 100) + '%';
+}
+
+/* ---------- busca "o que você quer fazer" ---------- */
+const PARE = new Set('a o e as os um uma uns umas de do da dos das no na nos nas em para pra pro com sem por pelo pela ao aos meu minha meus minhas seu sua que quero queria preciso fazer como mais muito se eu me sobre algo ajuda ajudar criar gerar ter tenho isso esse essa hoje'.split(' '));
+// [palavras do usuário (início), funções que elas indicam, termos para procurar no título/resumo]
+const SIN = [
+  [['brav', 'irrit', 'nervos', 'chatead', 'reclam', 'grosso', 'raiva', 'critic', 'insatisf', 'xingou'], ['responder'], ['reclama', 'avalia', 'cliente', 'critic']],
+  [['avalia', 'nota', 'review', 'estrela', 'google', 'comentari'], ['responder'], ['avalia', 'comentari']],
+  [['respond', 'resposta', 'atend', 'duvida', 'pergunt', 'cliente'], ['responder'], ['cliente', 'respost']],
+  [['post', 'insta', 'reels', 'reel', 'story', 'stories', 'legenda', 'carross', 'tiktok', 'rede', 'conteud', 'publica', 'divulg', 'feed'], ['post'], ['post', 'legenda', 'instagram', 'divulg']],
+  [['sexta', 'sabado', 'domingo', 'segunda', 'terca', 'quarta', 'quinta', 'fds', 'feriado', 'semana', 'natal', 'pascoa', 'maes', 'pais', 'namorad', 'junin', 'carnaval', 'data'], ['planejar', 'post'], ['semana', 'data', 'calendari', 'campanha', 'dia']],
+  [['preco', 'precific', 'cobrar', 'custo', 'margem', 'cmv', 'lucro', 'calcul', 'caro', 'barato', 'valor', 'quanto'], ['calcular'], ['preco', 'custo', 'margem']],
+  [['vend', 'ticket', 'combo', 'oferta', 'promo', 'descont', 'cupom', 'fatur', 'pedido', 'adicional'], ['vender'], ['combo', 'vend', 'promo', 'pedido']],
+  [['foto', 'imagem', 'print', 'anex', 'fotograf', 'camera'], ['imagem'], ['foto', 'imagem']],
+  [['equipe', 'funcion', 'garcom', 'atendente', 'cozinheir', 'trein', 'colaborador', 'motoboy'], ['equipe'], ['equipe', 'trein']],
+  [['estoque', 'compra', 'desperd', 'rotina', 'organiz', 'processo', 'fornecedor', 'checklist', 'limpeza'], ['organizar'], ['estoque', 'compra']],
+  [['analis', 'diagnost', 'compar', 'relatori', 'decid', 'entender', 'descobrir', 'melhor'], ['analisar'], ['analis', 'diagnost', 'melhor']],
+  [['planej', 'calendari', 'campanha', 'plano', 'estrateg', 'lancament'], ['planejar'], ['plano', 'calendari']],
+  [['escrev', 'texto', 'descri', 'mensag', 'whats', 'zap', 'anunci', 'bio', 'nome'], ['escrever'], ['descri', 'texto', 'mensag', 'nome']],
+  [['cardapi', 'menu', 'prato', 'produto', 'lanche', 'bebida', 'sobremesa', 'item', 'itens'], [], ['cardapi', 'prato', 'menu', 'item']],
+  [['ifood', 'delivery', 'entrega', 'app', 'aplicativ', 'rappi'], [], ['ifood', 'delivery', 'aplicativ', 'entrega']],
+  [['complet', 'inteir', 'tudo', 'grande', 'projeto', 'zero'], ['grande'], ['complet', 'inteir']]
+];
+const IDX = P.map(p => ({ t: norm(p.titulo), r: norm(p.resumo), f: norm(p.funcoes.map(f => FUNC[f] ? FUNC[f].nome : f).join(' ')), x: norm(p.texto.replace(/\{\{\w+\}\}/g, '')) }));
+const raiz = t => { if (t.length > 4 && t.endsWith('s')) t = t.slice(0, -1); return t.length > 6 ? t.slice(0, -2) : t };
+function pontua(q) {
+  const toks = norm(q).split(/[^a-z0-9]+/).filter(t => t.length > 1 && !PARE.has(t));
+  if (!toks.length) return null;
+  const grupos = toks.map(t => SIN.filter(([ch]) => ch.some(c => t.startsWith(c) || (t.length >= 4 && c.startsWith(t)))));
+  return P.map((p, i) => {
+    const ix = IDX[i]; let s = 0, achou = 0;
+    toks.forEach((t, j) => {
+      const r = raiz(t); let ts = 0;
+      if (ix.t.includes(r)) ts += 6;
+      if (ix.r.includes(r)) ts += 3;
+      if (ix.f.includes(r)) ts += 2;
+      for (const [, funcs, palavras] of grupos[j]) {
+        for (const f of funcs) if (p.funcoes.includes(f)) ts += 3;
+        for (const w of palavras) { if (ix.t.includes(w)) ts += 2; else if (ix.r.includes(w)) ts += 1 }
+      }
+      if (!ts && r.length > 3 && ix.x.includes(r)) ts += .5;
+      if (ts) achou++;
+      s += ts;
+    });
+    return s ? s * (1 + achou / toks.length) : 0;
+  });
+}
+const OBJETIVOS = ['Responder cliente bravo', 'Post para o fim de semana', 'Calcular o preço de um prato', 'Melhorar o cardápio', 'Vender mais no iFood', 'Analisar uma foto', 'Treinar a equipe', 'Organizar estoque e compras'];
+
+/* ---------- lista ---------- */
+function filtrados() {
+  const f = st.f, sc = f.q.trim() ? pontua(f.q) : null;
+  const l = P.filter((p, i) => (!sc || sc[i] > 0) && (!f.func || p.funcoes.includes(f.func)) && (!f.cap || p.capitulo === f.cap)
+    && (!f.img || p.imagem) && (!f.fav || st.fav.has(p.n)) && (!f.nusado || !st.usados.has(p.n)));
+  if (sc) { const ix = Object.fromEntries(P.map((p, i) => [p.n, sc[i]])); l.sort((a, b) => ix[b.n] - ix[a.n] || a.n - b.n) }
+  return l;
+}
+function card(p) {
+  const u = st.usados.has(p.n), s = st.sel.has(p.n), fv = st.fav.has(p.n);
+  return `<article class="card${u ? ' usado' : ''}${s ? ' sel' : ''}" data-n="${p.n}">
+    <div class="card-cab"><span class="num">Nº ${num(p.n)}</span><span class="cap">${esc(CAP[p.capitulo] ? CAP[p.capitulo].nome : '')}</span>
+      <button type="button" class="fav js-fav" aria-pressed="${fv}" aria-label="${fv ? 'Tirar dos favoritos' : 'Favoritar'}" title="Favorito">★</button></div>
+    <h3><button type="button" class="js-abrir">${esc(p.titulo)}</button></h3>
+    <p class="resumo">${esc(p.resumo)}</p>
+    <div class="tags">${p.imagem ? '<b class="selo">📷 Anexe uma foto</b>' : ''}${p.funcoes.filter(f => f !== 'imagem').map(f => `<span>${esc(FUNC[f] ? FUNC[f].nome : f)}</span>`).join('')}</div>
+    <div class="card-pe">
+      <label class="chk"><input type="checkbox" class="js-sel"${s ? ' checked' : ''}> Exportar</label>
+      ${u ? '<span class="usado-tag">✓ Já usei</span>' : ''}
+      <button type="button" class="b pri js-abrir">Abrir e preencher</button>
+    </div></article>`;
+}
+function botaoExportar() {
+  $('ir-exportar').hidden = !st.sel.size;
+  $('ir-exportar').textContent = `Exportar ${plural(st.sel.size, 'selecionado', 'selecionados')} →`;
+}
+function renderLista() {
+  const n = fichaCheia();
+  $('aviso-ficha').innerHTML = n < FICHA.length ? `<div class="aviso-ficha"><span>Sua ficha tem <b>${n} de ${FICHA.length}</b> dados. Com ela completa, os prompts já saem preenchidos.</span><button type="button" class="link" data-ir="inicio">Completar a ficha</button></div>` : '';
+  const l = filtrados(), f = st.f, filtrando = f.func || f.cap || f.img || f.fav || f.nusado;
+  $('res-n').innerHTML = `${plural(l.length, 'prompt', 'prompts')} <small>${f.q.trim() ? `mais úteis para “${esc(f.q.trim())}”` : filtrando ? `de ${TOTAL}` : 'na biblioteca'}</small>`;
+  $('lista').innerHTML = l.slice(0, st.mostrando).map(card).join('') ||
+    `<p class="vazio">Nenhum prompt encontrado. Tente outras palavras, como “post”, “preço” ou “avaliação”, ou limpe os filtros.</p>`;
+  const resto = l.length - st.mostrando;
+  $('mais').hidden = resto <= 0; $('mais').textContent = `Mostrar mais (${resto} restantes)`;
+  const todosSel = l.length && l.every(p => st.sel.has(p.n));
+  $('sel-filtro').textContent = todosSel ? `Tirar estes ${l.length} da exportação` : `Selecionar ${l.length === TOTAL ? 'todos' : 'todos do filtro'} (${l.length})`;
+  $('sel-filtro').disabled = !l.length;
+  botaoExportar();
+  $('f-limpar').hidden = !filtrando; $('q-limpar').hidden = !f.q;
+  document.querySelectorAll('#chips-func .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.f === f.func));
+  $('f-cap').value = f.cap;
+  for (const [id, k] of [['f-img', 'img'], ['f-fav', 'fav'], ['f-nusado', 'nusado']]) $(id).setAttribute('aria-pressed', f[k]);
+  progresso();
+}
+function filtroMudou() { st.mostrando = POR_PAG; renderLista() }
+function montaFiltros() {
+  $('objs').innerHTML = '<span class="objs-rot">Objetivos prontos:</span>' + OBJETIVOS.map(o => `<button type="button" class="obj" data-obj="${esc(o)}">${esc(o)}</button>`).join('');
+  $('chips-func').innerHTML = `<button type="button" class="chip" data-f="">Todas as funções</button>` +
+    D.funcoes.map(f => `<button type="button" class="chip" data-f="${f.id}" title="${esc(f.descricao)}">${esc(f.nome)} <span class="q">${P.filter(p => p.funcoes.includes(f.id)).length}</span></button>`).join('');
+  $('f-cap').innerHTML = `<option value="">Todos os capítulos (${TOTAL})</option>` + D.capitulos.map(c => `<option value="${c.id}">${esc(c.nome)} (${P.filter(p => p.capitulo === c.id).length})</option>`).join('');
+}
+let qTimer;
+$('q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { st.f.q = e.target.value; filtroMudou() }, 150) });
+$('q-limpar').addEventListener('click', () => { $('q').value = ''; st.f.q = ''; filtroMudou(); $('q').focus() });
+$('objs').addEventListener('click', e => { const b = e.target.closest('[data-obj]'); if (!b) return; $('q').value = st.f.q = b.dataset.obj; filtroMudou() });
+$('chips-func').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; st.f.func = st.f.func === b.dataset.f ? '' : b.dataset.f; filtroMudou() });
+$('f-cap').addEventListener('change', e => { st.f.cap = e.target.value; filtroMudou() });
+for (const [id, k] of [['f-img', 'img'], ['f-fav', 'fav'], ['f-nusado', 'nusado']]) $(id).addEventListener('click', () => { st.f[k] = !st.f[k]; filtroMudou() });
+$('f-limpar').addEventListener('click', () => { Object.assign(st.f, { func: '', cap: '', img: false, fav: false, nusado: false }); filtroMudou() });
+$('mais').addEventListener('click', () => { st.mostrando += POR_PAG; renderLista() });
+$('sel-filtro').addEventListener('click', () => {
+  const l = filtrados(), todos = l.every(p => st.sel.has(p.n));
+  l.forEach(p => todos ? st.sel.delete(p.n) : st.sel.add(p.n)); salvar('sel'); renderLista();
+  toast(todos ? 'Tirados da exportação' : `${plural(l.length, 'prompt selecionado', 'prompts selecionados')} para exportar`);
+});
+$('ir-exportar').addEventListener('click', () => { document.querySelector('input[name=exp-tipo][value=completo]').checked = true; irPara('exportar') });
+$('lista').addEventListener('click', e => {
+  const c = e.target.closest('.card'); if (!c) return; const n = +c.dataset.n;
+  if (e.target.closest('.js-abrir')) return abrePainel(n);
+  const fv = e.target.closest('.js-fav');
+  if (fv) { st.fav.has(n) ? st.fav.delete(n) : st.fav.add(n); salvar('fav'); fv.setAttribute('aria-pressed', st.fav.has(n)); fv.setAttribute('aria-label', st.fav.has(n) ? 'Tirar dos favoritos' : 'Favoritar') }
+});
+$('lista').addEventListener('change', e => {
+  if (!e.target.classList.contains('js-sel')) return;
+  const c = e.target.closest('.card'), n = +c.dataset.n;
+  e.target.checked ? st.sel.add(n) : st.sel.delete(n); salvar('sel'); c.classList.toggle('sel', e.target.checked);
+  botaoExportar(); progresso();
+});
+
+/* ---------- painel de preencher ---------- */
+const rotulos = p => Object.fromEntries([...FICHA, ...p.campos].map(c => [c.k, c.rotulo]));
+const chavesDo = p => [...new Set([...p.texto.matchAll(/\{\{(\w+)\}\}/g)].map(m => m[1]))];
+function faltando(p) { const r = rotulos(p); return chavesDo(p).filter(k => !cheio(k)).map(k => ({ k, r: r[k] || k })) }
+function textoFinal(p) { const r = rotulos(p); return p.texto.replace(/\{\{(\w+)\}\}/g, (m, k) => valor(k).trim() || `[CONFIRMAR: ${r[k] || k}]`) }
+function previaHTML(p) {
+  const r = rotulos(p);
+  return esc(p.texto).replace(/\{\{(\w+)\}\}/g, (m, k) => {
+    const v = valor(k).trim(), nome = esc(r[k] || k);
+    return v ? `<mark class="ok" data-k="${k}" title="${nome}">${esc(v)}</mark>` : `<mark class="falta" data-k="${k}" title="Toque para preencher">${nome}</mark>`;
+  });
+}
+function abrePainel(n) {
+  const p = PN[n]; if (!p) return;
+  if (!st.aberto) st.rolagem = window.scrollY;
+  st.aberto = n;
+  $('v-prompts').hidden = true; $('v-inicio').hidden = true; $('v-exportar').hidden = true; $('v-painel').hidden = false;
+  document.querySelectorAll('.abas button').forEach(b => b.setAttribute('aria-current', b.dataset.aba === 'prompts'));
+  const cap = CAP[p.capitulo];
+  $('p-meta').textContent = `Nº ${num(p.n)} · ${cap ? cap.nome : ''}`;
+  $('p-olho').textContent = p.funcoes.map(f => FUNC[f] ? FUNC[f].nome : f).join(' · ');
+  $('p-tit').textContent = p.titulo; $('p-resumo').textContent = p.resumo;
+  $('p-foto').innerHTML = p.imagem ? `<div class="foto"><b>📷 Este prompt precisa de uma foto</b><ol>
+      <li>Abra o ChatGPT (o gratuito serve).</li><li>Toque no <b>+</b> ou no <b>clipe</b> e anexe ${esc(p.imagem_dica || 'a foto')}.</li>
+      <li>Cole o prompt na mesma mensagem e envie.</li></ol></div>` : '';
+  $('p-campos').innerHTML = p.campos.length ? p.campos.map(c => campoHTML(c, 'fp-')).join('')
+    : `<p class="sem-campos">Este prompt não tem campos extras. Ele usa só os dados da sua ficha.</p>`;
+  const fUsa = FICHA.filter(f => p.usa_ficha.includes(f.k));
+  $('p-ficha').hidden = !fUsa.length;
+  $('p-ficha-campos').innerHTML = fUsa.map(c => campoHTML(c, 'fpf-')).join('');
+  $('p-ficha').open = false;
+  $('p-fav').setAttribute('aria-pressed', st.fav.has(n));
+  $('p-usado').checked = st.usados.has(n);
+  $('falta').hidden = true; $('pos').hidden = true;
+  atualizaPainel();
+  window.scrollTo(0, 0);
+  // a prévia abre já nos campos da tarefa (o começo do prompt é a ficha, que já vem pronta)
+  const pre = $('previa'), alvoM = p.campos.length && pre.querySelector(`mark[data-k="${p.campos[0].k}"]`);
+  pre.scrollTop = alvoM && pre.scrollHeight > pre.clientHeight ? Math.max(0, alvoM.offsetTop - pre.offsetTop - 80) : 0;
+}
+function atualizaPainel() {
+  const p = PN[st.aberto]; if (!p) return;
+  const tot = p.campos.length, ok = p.campos.filter(c => cheio(c.k)).length;
+  const txt = tot ? `${ok} de ${plural(tot, 'campo preenchido', 'campos preenchidos')}` : 'Nenhum campo extra';
+  $('p-cont').textContent = txt;
+  $('p-barra').style.width = (tot ? ok / tot * 100 : 100) + '%';
+  const fUsa = p.usa_ficha, fok = fUsa.filter(cheio).length, fs = $('p-ficha-st');
+  fs.textContent = fok === fUsa.length ? `✓ ${fok} de ${fUsa.length} prontos` : `${fok} de ${fUsa.length}: falta preencher`;
+  fs.classList.toggle('falta', fok < fUsa.length);
+  const falt = faltando(p).length;
+  $('p-cont2').textContent = falt ? `Falta${falt > 1 ? 'm' : ''} ${falt}` : '✓ Tudo preenchido';
+  const pre = $('previa'), top = pre.scrollTop; pre.innerHTML = previaHTML(p); pre.scrollTop = top;
+  if (!$('falta').hidden) mostraFalta();
+}
+function fechaPainel() {
+  st.aberto = null; $('v-painel').hidden = true; $('v-prompts').hidden = false;
+  renderLista(); window.scrollTo(0, st.rolagem);
+}
+$('voltar').addEventListener('click', fechaPainel);
+$('ver-previa').addEventListener('click', () => document.querySelector('.comanda').scrollIntoView({ block: 'start' }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && st.aberto && !e.target.closest('.in')) fechaPainel() });
+function focaCampo(k) {
+  if (FK.has(k)) $('p-ficha').open = true;
+  const box = document.querySelector(`#v-painel [data-campo="${k}"]`); if (!box) return;
+  box.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  const el = box.querySelector('.in:not([hidden]), input[type=radio]'); if (el) el.focus({ preventScroll: true });
+}
+$('previa').addEventListener('click', e => { const m = e.target.closest('mark[data-k]'); if (m) focaCampo(m.dataset.k) });
+$('p-fav').addEventListener('click', e => { const n = st.aberto; st.fav.has(n) ? st.fav.delete(n) : st.fav.add(n); salvar('fav'); e.currentTarget.setAttribute('aria-pressed', st.fav.has(n)) });
+$('p-usado').addEventListener('change', e => { const n = st.aberto; e.target.checked ? st.usados.add(n) : st.usados.delete(n); salvar('usados'); progresso() });
+function mostraFalta() {
+  const f = faltando(PN[st.aberto]);
+  if (!f.length) { $('falta').hidden = true; return }
+  $('falta').innerHTML = `<div><b>Falta${f.length > 1 ? 'm' : ''} ${plural(f.length, 'campo', 'campos')}:</b> ${f.map(x => esc(x.r)).join(', ')}. Se copiar assim, eles vão marcados como [CONFIRMAR] e o ChatGPT pergunta para você.</div>
+    <div class="acoes"><button type="button" class="b pri" id="falta-ir">Preencher agora</button><button type="button" class="b" id="falta-copiar">Copiar mesmo assim</button></div>`;
+  $('falta').hidden = false;
+}
+$('falta').addEventListener('click', e => {
+  if (e.target.id === 'falta-ir') { const f = faltando(PN[st.aberto]); if (f.length) focaCampo(f[0].k) }
+  if (e.target.id === 'falta-copiar') copiaPrompt(true);
+});
+$('copiar').addEventListener('click', () => copiaPrompt(false));
+function copiaTexto(txt, ok, falhou) {
+  try { navigator.clipboard.writeText(txt).then(ok, falhou) } catch (e) { falhou() }
+}
+function copiaPrompt(forcar) {
+  const p = PN[st.aberto];
+  if (!forcar && faltando(p).length) { $('pos').hidden = true; mostraFalta(); return }
+  $('falta').hidden = true;
+  const txt = textoFinal(p), n = p.n;
+  const passos = `<ol><li>Abra o ChatGPT.</li>${p.imagem ? `<li>Toque no <b>+</b> ou no <b>clipe</b> e anexe ${esc(p.imagem_dica || 'a foto')}.</li>` : ''}<li>Toque e segure na caixa de mensagem, escolha <b>Colar</b> e envie.</li></ol>`;
+  const marca = () => { if (!st.usados.has(n)) { st.usados.add(n); salvar('usados'); $('p-usado').checked = true; progresso() } };
+  copiaTexto(txt, () => {
+    marca(); $('pos').innerHTML = `<b>Prompt copiado. Agora:</b>${passos}`; $('pos').hidden = false; toast('Prompt copiado');
+  }, () => {
+    marca();
+    $('pos').innerHTML = `<b>A cópia automática foi bloqueada neste aparelho.</b><span>O texto abaixo já está selecionado: toque e segure e escolha Copiar (ou Ctrl+C).</span><textarea class="manual" id="manual" readonly></textarea>${passos}`;
+    $('pos').hidden = false; const m = $('manual'); m.value = txt; m.focus(); m.select();
+  });
+}
+
+/* ---------- exportar ---------- */
+const linhaFunc = p => p.funcoes.map(f => FUNC[f] ? FUNC[f].nome : f).join(', ');
+function fichaTexto(comDados, comChave) {
+  return FICHA.map(f => `- ${f.rotulo}${comChave ? ` ({{${f.k}}})` : ''}: ${comDados ? (valor(f.k).trim() || '(não preenchido)') : ''}`).join('\n');
+}
+function geraNavegador(comDados) {
+  const L = [];
+  L.push('NAVEGADOR DA BIBLIOTECA · CARDÁPIO QUE VENDE', '='.repeat(44), '',
+    'INSTRUÇÃO PARA O CHATGPT',
+    `Este é o índice da minha biblioteca de ${TOTAL} prompts para o meu negócio de comida. O texto completo de cada prompt fica comigo, na Área do Comprador.`,
+    'Quando eu disser o que quero fazer, recomende de 1 a 3 prompts pelo número (Nº), explique em uma frase por que cada um ajuda e avise se preciso anexar uma foto.',
+    'Se nenhum prompt servir, diga isso com franqueza e sugira o que eu posso pedir.',
+    'Agora responda só: "Índice carregado. O que você quer fazer hoje?"', '');
+  if (comDados) L.push('MEU NEGÓCIO', fichaTexto(true, false), '');
+  for (const c of D.capitulos) {
+    const ps = P.filter(p => p.capitulo === c.id); if (!ps.length) continue;
+    L.push(`## ${c.nome.toUpperCase()} (${ps.length})`);
+    for (const p of ps) L.push(`Nº ${num(p.n)} | ${p.titulo} | ${p.resumo} | Funções: ${linhaFunc(p)} | Foto: ${p.imagem ? 'sim, ' + (p.imagem_dica || 'anexar foto') : 'não'}`);
+    L.push('');
+  }
+  return L.join('\n');
+}
+function geraCompleto(ns, comDados) {
+  const ps = ns.map(n => PN[n]).filter(Boolean).sort((a, b) => a.n - b.n), L = [];
+  L.push('BIBLIOTECA DE PROMPTS · CARDÁPIO QUE VENDE', '='.repeat(42), '',
+    'INSTRUÇÃO PARA O CHATGPT',
+    'Esta é a minha biblioteca de prompts para o meu negócio de comida. Leia o arquivo inteiro e guarde. Não execute nenhum prompt agora.',
+    'Quando eu pedir "use o prompt Nº X", execute o prompt de número X:',
+    '- Onde o prompt disser "Use da MINHA FICHA", ou aparecer um dado da ficha entre chaves duplas, como {{nome}}, use os valores da ficha abaixo.',
+    '- Para os outros campos entre chaves duplas, como {{prato}}, me pergunte as informações antes de começar, todas de uma vez.',
+    '- Se o prompt pedir foto, me lembre de anexar antes.',
+    'Se eu disser só o meu objetivo, indique qual prompt do índice usar.',
+    'Agora responda só: "Biblioteca carregada. Qual prompt você quer usar?"', '',
+    'MINHA FICHA', comDados ? fichaTexto(true, true) : fichaTexto(false, true) + '\n(Ficha em branco: me pergunte esses dados no primeiro uso.)', '',
+    `ÍNDICE (${plural(ps.length, 'prompt', 'prompts')})`);
+  for (const p of ps) L.push(`Nº ${num(p.n)} · ${p.titulo}${p.imagem ? ' · precisa de foto' : ''}`);
+  L.push('', 'PROMPTS');
+  for (const p of ps) {
+    const cap = CAP[p.capitulo];
+    // A ficha já está no topo do arquivo: troca o bloco de contexto repetido por uma referência (economiza ~300 caracteres por prompt).
+    let t = p.texto.replace(/(## CONTEXTO DO MEU NEGÓCIO\n)((?:- [^\n]*\{\{\w+\}\}[^\n]*\n)+)/, (m, cab, linhas) => {
+      const ks = [...linhas.matchAll(/\{\{(\w+)\}\}/g)].map(x => x[1]);
+      if (!ks.every(k => FK.has(k))) return m;
+      return `${cab}Use da MINHA FICHA: ${ks.map(k => FICHA.find(f => f.k === k).rotulo).join(', ')}.\n`;
+    });
+    if (comDados) t = t.replace(/\{\{(\w+)\}\}/g, (m, k) => FK.has(k) ? m : (valor(k).trim() || m));
+    L.push('', `----- PROMPT Nº ${num(p.n)} · ${p.titulo} -----`,
+      `Capítulo: ${cap ? cap.nome : ''} | Funções: ${linhaFunc(p)}${p.imagem ? ` | Anexe: ${p.imagem_dica || 'uma foto'}` : ''}`,
+      p.campos.length ? `Campos da tarefa: ${p.campos.map(c => `{{${c.k}}} = ${c.rotulo}`).join('; ')}` : 'Campos da tarefa: nenhum (usa só a ficha)', '', t);
+  }
+  return L.join('\n') + '\n';
+}
+let saida = { nome: '', txt: '' };
+function renderExport() {
+  const tipo = document.querySelector('input[name=exp-tipo]:checked').value, com = document.querySelector('input[name=exp-dados]:checked').value === 'com';
+  $('exp-quais').hidden = tipo !== 'completo';
+  $('exp-n-dados').textContent = tipo === 'completo' ? 3 : 2; $('exp-n-arq').textContent = tipo === 'completo' ? 4 : 3;
+  const ns = [...st.sel];
+  $('exp-sel-txt').textContent = ns.length ? `${plural(ns.length, 'prompt selecionado', 'prompts selecionados')}. Marque ou desmarque capítulos inteiros:` : 'Nenhum prompt selecionado ainda. Marque um capítulo abaixo ou use “Exportar” nos cards.';
+  $('exp-caps').innerHTML = D.capitulos.map(c => {
+    const ps = P.filter(p => p.capitulo === c.id), k = ps.filter(p => st.sel.has(p.n)).length;
+    return `<label class="chk"><input type="checkbox" data-cap="${c.id}"${k && k === ps.length ? ' checked' : ''}> ${esc(c.nome)} <span class="mono" style="color:var(--cinza)">(${k && k < ps.length ? k + ' de ' : ''}${ps.length})</span></label>`;
+  }).join('');
+  if (tipo === 'nav') saida = { nome: 'cardapio-que-vende-navegador.txt', txt: geraNavegador(com) };
+  else saida = { nome: com ? 'cardapio-que-vende-meus-prompts.txt' : 'cardapio-que-vende-modelos.txt', txt: ns.length ? geraCompleto(ns, com) : '' };
+  $('exp-saida').value = saida.txt;
+  $('exp-nome').textContent = saida.txt ? saida.nome : '';
+  const n = saida.txt.length;
+  $('exp-tam').textContent = n ? `${nfmt(n)} caracteres` : 'Selecione prompts para gerar o arquivo';
+  $('exp-baixar').disabled = $('exp-copiar').disabled = !n;
+  const grande = n > LIMITE;
+  $('exp-alerta').hidden = !grande;
+  if (grande) $('exp-alerta').innerHTML = `<b>Arquivo grande para o ChatGPT gratuito.</b> Acima de uns ${nfmt(LIMITE)} caracteres ele pode ler só uma parte. Exporte um capítulo por vez, ou use o Navegador da biblioteca, que é leve.`;
+  progresso();
+}
+$('v-exportar').addEventListener('change', e => {
+  const cap = e.target.dataset.cap;
+  if (cap) { P.filter(p => p.capitulo === cap).forEach(p => e.target.checked ? st.sel.add(p.n) : st.sel.delete(p.n)); salvar('sel') }
+  if (cap || e.target.name === 'exp-tipo' || e.target.name === 'exp-dados') renderExport();
+});
+$('exp-todos').addEventListener('click', () => { P.forEach(p => st.sel.add(p.n)); salvar('sel'); renderExport() });
+$('exp-limpar').addEventListener('click', () => { st.sel.clear(); salvar('sel'); renderExport() });
+$('exp-copiar').addEventListener('click', () => copiaTexto(saida.txt, () => toast('Tudo copiado. Cole no ChatGPT e envie.'), () => {
+  const t = $('exp-saida'); t.focus(); t.select(); toast('Texto selecionado: use Copiar ou Ctrl+C');
+}));
+// No Artifact, o download passa pela capacidade "downloads"; fora dele, Blob comum.
+const baixador = window.claude && typeof window.claude.use === 'function' ? Promise.resolve(window.claude.use('downloads')).catch(() => null) : null;
+if (baixador) baixador.then(d => { if (!d) { $('exp-baixar').hidden = true; $('exp-msg').textContent = 'Aqui o download não está disponível. Use “Copiar tudo” e cole no ChatGPT.' } });
+$('exp-baixar').addEventListener('click', async () => {
+  if (!saida.txt) return;
+  if (baixador) {
+    const d = await baixador;
+    if (!d) { toast('Download indisponível aqui. Use “Copiar tudo”.'); return }
+    try { await d.save({ filename: saida.nome, data: saida.txt }); toast('Arquivo salvo') }
+    catch (e) { toast(e && e.code === 'declined' ? 'Download cancelado' : 'Não deu para baixar aqui. Use “Copiar tudo”.') }
+    return;
+  }
+  try {
+    const url = URL.createObjectURL(new Blob([saida.txt], { type: 'text/plain;charset=utf-8' }));
+    const a = document.createElement('a'); a.href = url; a.download = saida.nome; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000); toast('Arquivo baixado');
+  } catch (e) { toast('Não deu para baixar. Use “Copiar tudo”.') }
+});
+
+/* ---------- início ---------- */
+montaFiltros(); progresso();
+const alvo = (location.hash || '').slice(1);
+if (/^p\d{3}$/.test(alvo) && PN[+alvo.slice(1)]) { irPara('prompts', true); abrePainel(+alvo.slice(1)) }
+else if (['inicio', 'prompts', 'exportar'].includes(alvo)) irPara(alvo, true)
+else irPara(['inicio', 'prompts', 'exportar'].includes(st.aba) ? st.aba : (fichaCheia() ? 'prompts' : 'inicio'), true);
+</script>

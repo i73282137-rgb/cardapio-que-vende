@@ -1,0 +1,73 @@
+# Princípios de especialista por capítulo: entram em todos os prompts do capítulo como referência para a IA.
+CONHECIMENTO = {
+"cardapio": [
+ "Cliente lê cardápio em poucos segundos: nomes claros e descrições curtas vendem mais que textos longos.",
+ "Descrição boa cita ingrediente principal, técnica de preparo e textura (crocante, cremoso, macio).",
+ "Os itens mais lucrativos devem aparecer primeiro na seção ou com destaque visual.",
+ "Preços alinhados à direita em coluna e sem cifrão em destaque fazem o cliente comparar menos por preço.",
+ "Cardápio grande demais aumenta o tempo de decisão, o estoque e o desperdício.",
+],
+"instagram": [
+ "Os 2 primeiros segundos do vídeo e a primeira linha da legenda decidem se a pessoa continua.",
+ "Para negócio local, alcance no bairro vale mais do que seguidores de longe.",
+ "Bastidor e gente real geram confiança; foto de comida com luz natural vende mais que arte cheia de texto.",
+ "Toda publicação precisa de um caminho claro para pedir (link, WhatsApp, endereço).",
+ "Constância simples (3 a 4 posts por semana e stories diários) supera picos de esforço.",
+],
+"whatsapp": [
+ "Mensagem curta, com uma única chamada para ação, tem mais resposta.",
+ "Lista de transmissão só chega a quem salvou seu número; peça para salvar.",
+ "Excesso de mensagens leva a bloqueio. No máximo 2 a 3 envios por semana para listas.",
+ "Resumo do pedido com total e prazo evita erro e reclamação.",
+ "Venda direta economiza a taxa do aplicativo, mas exige atendimento rápido.",
+],
+"ifood": [
+ "No aplicativo, foto, nota, tempo de entrega e taxa decidem o clique antes do cardápio.",
+ "Nomes de itens com o termo que o cliente digita aparecem mais na busca.",
+ "Respostas educadas a avaliações negativas são lidas por novos clientes e passam confiança.",
+ "Preço no app costuma precisar compensar a taxa da plataforma.",
+ "Atrasos e itens faltando são as causas mais comuns de nota baixa.",
+],
+"promocoes": [
+ "Promoção boa tem prazo, motivo e regra simples.",
+ "Desconto em porcentagem pesa na margem; combo e brinde de baixo custo costumam pesar menos.",
+ "Toda promoção precisa de uma forma de medir resultado (cupom, contagem, código).",
+ "Datas comemorativas exigem preparo com 2 a 4 semanas de antecedência.",
+ "Promoção constante ensina o cliente a só comprar com desconto.",
+],
+"atendimento": [
+ "Cliente irritado quer primeiro ser ouvido, depois a solução.",
+ "Resposta pública é lida por quem ainda não comprou: escreva para eles também.",
+ "Nunca exponha dados do cliente nem discuta em público.",
+ "Resolver rápido custa menos do que perder o cliente e a nota.",
+ "Plataformas como Google e iFood proíbem trocar avaliação por benefício.",
+],
+"gestao": [
+ "Margem de contribuição = preço de venda menos custos variáveis (ingredientes, embalagem, taxas).",
+ "CMV = estoque inicial + compras − estoque final; em porcentagem, divide-se pelo faturamento.",
+ "Ponto de equilíbrio = custos fixos ÷ margem de contribuição em porcentagem.",
+ "Ficha técnica padroniza porção e é a base de qualquer preço correto.",
+ "Decisão boa compara pelo menos duas opções com números, não com impressão.",
+],
+"equipe": [
+ "Instrução escrita em passos curtos reduz erros mais do que explicação verbal.",
+ "Checklist só funciona se alguém confere e assina.",
+ "Feedback eficaz fala do comportamento, não da pessoa, e termina com combinado.",
+ "Reconhecimento frequente e específico motiva mais do que prêmio raro.",
+ "Questões trabalhistas e sanitárias precisam ser conferidas com contador e responsável técnico.",
+],
+"imagens": [
+ "A IA só deve usar o que está visível na imagem; o resto é suposição.",
+ "Foto boa de comida: luz natural lateral, fundo limpo, prato inteiro ou close no detalhe.",
+ "Para ler textos em foto, a imagem precisa estar reta, nítida e iluminada.",
+ "Antes de enviar, apague dados pessoais de clientes que aparecerem em prints.",
+ "Várias fotos do mesmo assunto permitem comparação e escolha melhor.",
+],
+"projetos": [
+ "Entregas grandes ficam melhores divididas em partes, revisadas uma de cada vez.",
+ "Todo plano precisa de prazos, responsáveis e forma de medir.",
+ "Números de projeção devem ser marcados como estimativa e conferidos.",
+ "Começar pelo diagnóstico evita planos genéricos.",
+ "Partes legais, fiscais e sanitárias devem ser validadas por profissional.",
+],
+}
