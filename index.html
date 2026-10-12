@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Cardápio que Vende</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -92,6 +98,9 @@ footer { padding-inline:16px; padding-block:32px; font:13px var(--f-mono); color
 @media (max-width:520px) { .caps { grid-template-columns:1fr } }
 @media (prefers-reduced-motion: reduce) { .btn { transition:none } }
 </style>
+</head>
+<body>
+
 
 <header class="faixa hero">
   <div class="miolo">
@@ -179,9 +188,9 @@ footer { padding-inline:16px; padding-block:32px; font:13px var(--f-mono); color
         <li>Busca por função, preenchimento guiado e exportação para o ChatGPT</li>
         <li>36 prompts que analisam fotos do cardápio, da fachada, do prato, de prints e de notas</li>
         <li>31 projetos grandes, como o texto do site, um plano de marketing e o manual da equipe</li>
-        <li>7 dias para pedir o dinheiro de volta, se não for o que você esperava</li>
+        <li>Acesso ao site liberado automaticamente após a confirmação do pagamento</li>
       </ul>
-      <div class="acoes"><a class="btn js-comprar" href="#oferta">Quero experimentar</a><span class="nota js-status">Pagamento único de R$ 9,99</span></div>
+      <div class="acoes"><a class="btn js-comprar" href="#oferta">Quero acessar</a><span class="nota js-status">Pagamento único de R$ 9,99 · acesso automático</span></div>
     </div>
     <div class="preco"><small>R$</small>9<small style="font-size:.45em;vertical-align:top">,99</small></div>
   </div>
@@ -193,9 +202,9 @@ footer { padding-inline:16px; padding-block:32px; font:13px var(--f-mono); color
     <h2>Perguntas frequentes</h2>
     <div class="faq">
       <details><summary>Preciso pagar alguma IA?</summary><p>Não. A biblioteca foi feita para o ChatGPT gratuito e funciona também no Claude e no Gemini. Os prompts com foto usam o envio de imagens, que o plano gratuito permite com limite diário.</p></details>
-      <details><summary>Como recebo a biblioteca?</summary><p>Assim que o pagamento é confirmado, o acesso chega no seu e-mail. Pelo Pix ou cartão, a confirmação costuma sair na hora.</p></details>
+      <details><summary>Como recebo a biblioteca?</summary><p>Assim que o pagamento é confirmado, a plataforma envia o acesso ao site para o seu e-mail. Pelo Pix ou cartão, a confirmação costuma sair na hora.</p></details>
       <details><summary>Funciona para o meu tipo de negócio?</summary><p>Os prompts foram escritos para restaurantes, lanchonetes, padarias, pizzarias, hamburguerias, docerias e marmitarias. Você preenche a ficha do negócio uma vez e cada texto sai com o seu jeito.</p></details>
-      <details><summary>E se eu não gostar?</summary><p>Tudo bem. Você tem 7 dias para pedir o reembolso integral pela própria plataforma de pagamento, como prevê o Código de Defesa do Consumidor.</p></details>
+      <details><summary>Quando o acesso é liberado?</summary><p>A liberação acontece automaticamente depois que a Kiwify confirma o pagamento. O acesso é enviado para o e-mail usado na compra.</p></details>
       <details><summary>A IA vai inventar coisa sobre meu negócio?</summary><p>Cada prompt pede que a IA use só o que você informou e marque com [CONFIRMAR] o que estiver faltando. Mesmo assim, vale dar uma conferida em preços e números antes de publicar.</p></details>
     </div>
   </div>
@@ -204,8 +213,9 @@ footer { padding-inline:16px; padding-block:32px; font:13px var(--f-mono); color
 <footer>Cardápio que Vende · biblioteca digital de prompts · conteúdo criado com o Claude</footer>
 
 <script>
-// Link do checkout (Kiwify, Hotmart ou Mercado Pago). Enquanto vazio, os botões levam à oferta e avisam.
-const CHECKOUT_URL = "";
+// Cole aqui o link do checkout da Kiwify quando o produto for criado.
+// A plataforma confirma o pagamento e envia o acesso ao site automaticamente.
+    const CHECKOUT_URL = "https://pay.kiwify.com.br/IhR7ScY";
 
 const PROMPTS = ["Você vai agir como redator de cardápios com 15 anos de experiência em restaurantes brasileiros. Leia tudo antes de responder e siga as instruções na ordem.\n\n## CONTEXTO DO MEU NEGÓCIO\n- Nome do negócio: [Nome do negócio]\n- Tipo de negócio: [Tipo de negócio]\n- Cidade e bairro: [Cidade e bairro]\n- Público principal: [Público principal]\n- Faixa de preço: [Faixa de preço]\n- Diferenciais reais: [Diferenciais reais]\n- Tom de voz: [Tom de voz]\n- Onde você vende: [Onde você vende]\n\n## OBJETIVO\nCriar descrições curtas e apetitosas para um prato, que façam o cliente entender o que vai comer e sentir vontade de pedir.\n\n## O QUE UM ESPECIALISTA SABE (use como referência)\n- Cliente lê cardápio em poucos segundos: nomes claros e descrições curtas vendem mais que textos longos.\n- Descrição boa cita ingrediente principal, técnica de preparo e textura (crocante, cremoso, macio).\n- Os itens mais lucrativos devem aparecer primeiro na seção ou com destaque visual.\n- Preços alinhados à direita em coluna e sem cifrão em destaque fazem o cliente comparar menos por preço.\n- Cardápio grande demais aumenta o tempo de decisão, o estoque e o desperdício.\n\n## INFORMAÇÕES PARA ESTA TAREFA\n- Nome do prato: [Nome do prato]\n- Ingredientes principais: [Ingredientes principais]\n- Detalhe de preparo que vale destacar: [Detalhe de preparo que vale destacar]\n- Preço do prato: [Preço do prato]\n\n## COMO FAZER (siga as etapas na ordem)\n1. Identifique o ingrediente ou detalhe que mais diferencia este prato.\n2. Liste 3 palavras de textura e 3 de sabor que combinam com os ingredientes reais.\n3. Escreva 3 versões de descrição: uma curta, uma média e uma que conta a origem ou o preparo.\n4. Revise cortando adjetivos vazios e palavras repetidas.\n\n## FORMATO DA RESPOSTA\nTrês versões numeradas. Versão 1 com até 90 caracteres, versão 2 com até 160, versão 3 com até 250. Depois, uma linha dizendo qual você recomenda para cardápio impresso e qual para o iFood.\n\n## REGRAS\n- Escreva em português do Brasil, com linguagem simples, como um dono de negócio fala no balcão.\n- Use somente as informações que eu passei. Não invente preços, ingredientes, prêmios, números, avaliações ou depoimentos.\n- Se faltar alguma informação importante, escreva [CONFIRMAR: o que falta] no lugar, em vez de inventar.\n- Evite exageros vazios como \"o melhor da cidade\", \"incrível\", \"imperdível\" e \"sabor inesquecível\".\n\n## ANTES DE ENTREGAR, CONFIRA\n- Nenhum ingrediente foi adicionado além dos que eu passei.\n- As contagens de caracteres foram respeitadas.\n- Todas as informações do meu negócio que eu passei foram usadas corretamente.\n- Nada foi inventado. O que faltou está marcado com [CONFIRMAR].\n\nNo final, pergunte se eu quero ajustar o tom, o tamanho ou alguma informação, e sugira 1 próximo passo prático.", "Você vai agir como gerente de reputação de restaurantes. Leia tudo antes de responder e siga as instruções na ordem.\n\n## CONTEXTO DO MEU NEGÓCIO\n- Nome do negócio: [Nome do negócio]\n- Tipo de negócio: [Tipo de negócio]\n- Cidade e bairro: [Cidade e bairro]\n- Público principal: [Público principal]\n- Faixa de preço: [Faixa de preço]\n- Diferenciais reais: [Diferenciais reais]\n- Tom de voz: [Tom de voz]\n\n## OBJETIVO\nResponder publicamente uma avaliação negativa sem brigar e mostrando cuidado.\n\n## O QUE UM ESPECIALISTA SABE (use como referência)\n- No aplicativo, foto, nota, tempo de entrega e taxa decidem o clique antes do cardápio.\n- Nomes de itens com o termo que o cliente digita aparecem mais na busca.\n- Respostas educadas a avaliações negativas são lidas por novos clientes e passam confiança.\n- Preço no app costuma precisar compensar a taxa da plataforma.\n- Atrasos e itens faltando são as causas mais comuns de nota baixa.\n\n## INFORMAÇÕES PARA ESTA TAREFA\n- Avaliação do cliente: [Avaliação do cliente]\n- O que de fato aconteceu: [O que de fato aconteceu]\n- O que vamos fazer: [O que vamos fazer]\n\n## COMO FAZER (siga as etapas na ordem)\n1. Reconheça o problema sem culpar o cliente nem a equipe.\n2. Explique a solução de forma concreta.\n3. Convide para dar outra chance.\n4. Escreva 3 versões de até 400 caracteres.\n\n## FORMATO DA RESPOSTA\nTrês respostas e qual usar.\n\n## REGRAS\n- Escreva em português do Brasil, com linguagem simples, como um dono de negócio fala no balcão.\n- Use somente as informações que eu passei. Não invente preços, ingredientes, prêmios, números, avaliações ou depoimentos.\n- Se faltar alguma informação importante, escreva [CONFIRMAR: o que falta] no lugar, em vez de inventar.\n- Evite exageros vazios como \"o melhor da cidade\", \"incrível\", \"imperdível\" e \"sabor inesquecível\".\n- Nunca exponha dados do pedido ou do cliente na resposta pública.\n\n## ANTES DE ENTREGAR, CONFIRA\n- Todas as informações do meu negócio que eu passei foram usadas corretamente.\n- Nada foi inventado. O que faltou está marcado com [CONFIRMAR].\n\nNo final, pergunte se eu quero ajustar o tom, o tamanho ou alguma informação, e sugira 1 próximo passo prático.", "Você vai agir como consultor de varejo e comunicação visual. Leia tudo antes de responder e siga as instruções na ordem.\n\n## CONTEXTO DO MEU NEGÓCIO\n- Nome do negócio: [Nome do negócio]\n- Tipo de negócio: [Tipo de negócio]\n- Cidade e bairro: [Cidade e bairro]\n- Público principal: [Público principal]\n- Diferenciais reais: [Diferenciais reais]\n- Tom de voz: [Tom de voz]\n\n## OBJETIVO\nSaber se minha fachada atrai quem passa na rua.\n\n## O QUE UM ESPECIALISTA SABE (use como referência)\n- A IA só deve usar o que está visível na imagem; o resto é suposição.\n- Foto boa de comida: luz natural lateral, fundo limpo, prato inteiro ou close no detalhe.\n- Para ler textos em foto, a imagem precisa estar reta, nítida e iluminada.\n- Antes de enviar, apague dados pessoais de clientes que aparecerem em prints.\n- Várias fotos do mesmo assunto permitem comparação e escolha melhor.\n\n## IMAGEM ANEXADA\nAnexei a esta mensagem: uma foto da fachada tirada do outro lado da rua.\nAntes de qualquer coisa, descreva em até 4 linhas o que você vê na imagem. Use apenas o que está visível. Se a imagem estiver escura, cortada ou ilegível, diga o que não conseguiu ver e peça outra foto antes de continuar.\n\n## COMO FAZER (siga as etapas na ordem)\n1. Leia placa, letreiro e informações visíveis.\n2. Avalie leitura de longe, iluminação, convite para entrar.\n3. Liste 8 melhorias, das mais baratas às mais caras.\n\n## FORMATO DA RESPOSTA\nAvaliação e melhorias.\n\n## REGRAS\n- Escreva em português do Brasil, com linguagem simples, como um dono de negócio fala no balcão.\n- Use somente as informações que eu passei. Não invente preços, ingredientes, prêmios, números, avaliações ou depoimentos.\n- Se faltar alguma informação importante, escreva [CONFIRMAR: o que falta] no lugar, em vez de inventar.\n- Evite exageros vazios como \"o melhor da cidade\", \"incrível\", \"imperdível\" e \"sabor inesquecível\".\n\n## ANTES DE ENTREGAR, CONFIRA\n- Todas as informações do meu negócio que eu passei foram usadas corretamente.\n- Nada foi inventado. O que faltou está marcado com [CONFIRMAR].\n\nNo final, pergunte se eu quero ajustar o tom, o tamanho ou alguma informação, e sugira 1 próximo passo prático."];
 const cmd = document.getElementById('cmd');
@@ -231,7 +241,10 @@ document.querySelectorAll('.js-comprar').forEach(a => {
   if (CHECKOUT_URL) { a.href = CHECKOUT_URL; a.target = '_blank'; a.rel = 'noopener'; return; }
   if (a.closest('#oferta')) {
     a.setAttribute('aria-disabled', 'true');
-    a.addEventListener('click', ev => { ev.preventDefault(); document.querySelector('.js-status').textContent = 'As vendas abrem em breve. Obrigado pela paciência.'; });
+    a.addEventListener('click', ev => { ev.preventDefault(); document.querySelector('.js-status').textContent = 'Checkout em configuração. Volte em breve.'; });
   }
 });
 </script>
+
+</body>
+</html>
